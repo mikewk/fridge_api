@@ -7,8 +7,6 @@ from ariadne import load_schema_from_path, make_executable_schema, \
     graphql_sync, snake_case_fallback_resolvers
 from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
-from resolvers.mutations import mutations
-from resolvers.queries import queries
 from sqlalchemy import *
 
 app = Flask(__name__)
@@ -22,6 +20,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = mysql_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+from resolvers.mutations import mutations
+from resolvers.queries import queries
 # Setup Resolvers
 type_defs = load_schema_from_path("/var/www/fridge/api/schema.gql")
 schema = make_executable_schema(
@@ -34,9 +34,7 @@ schema = make_executable_schema(
 @app.route("/database")
 def database():
     from db import get_db
-
     d = get_db()
-    d.create_all()
     m = MetaData(d.engine)
     m.reflect()
     result = {}

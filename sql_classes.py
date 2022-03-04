@@ -6,8 +6,8 @@ db = get_db()
 Base = db.Model
 
 users_households_association = Table('users_households', Base.metadata,
-        Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
-        Column('household_id', Integer, ForeignKey('households.id', ondelete='CASCADE'))
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
+    Column('household_id', Integer, ForeignKey('households.id', ondelete='CASCADE'))
 )
 
 
