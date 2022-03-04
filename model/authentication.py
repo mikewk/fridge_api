@@ -1,17 +1,19 @@
 import hashlib
 import jwt
 import binascii
+import configparser
 from sql_classes import User, Household, Storage
 from sqlalchemy import and_
 from db import get_db
 from datetime import datetime, timedelta
-
-my_secret = "dev_secret_hash"
-my_salt = "fridgeapp"
+config = configparser.ConfigParser()
+config.read('/var/www/secrets.ini')
+my_secret = config["auth"]["secret"]
+my_salt = config["auth"]["salt"]
 
 def user_signup(email, password, name):
     db = get_db()
-    salt = email + my_salt;
+    salt = email + my_salt; #Not as good as a random salt, but we just won't let users change their username
     try:
         user = User.query.filter_by(email=email).first()
         if( user is not None ):
