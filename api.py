@@ -1,18 +1,35 @@
-from flask import Flask, render_template
 import db
 import configparser
 import logging
+
+from flask import Flask, render_template
+from ariadne import load_schema_from_path, make_executable_schema, \
+    graphql_sync, snake_case_fallback_resolvers
+from ariadne.constants import PLAYGROUND_HTML
+from flask import request, jsonify
+from resolvers.mutations import mutations
+from resolvers.queries import queries
 from sqlalchemy import *
+
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
-#Setup database
 
+# Setup database
 config = configparser.ConfigParser()
 config.read('/var/www/config.ini')
-mysql_uri= config["mysql"]["uri"]
+mysql_uri = config["mysql"]["uri"]
 app.config['SQLALCHEMY_DATABASE_URI'] = mysql_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+# Setup Resolvers
+type_defs = load_schema_from_path("/var/www/fridge/api/schema.gql")
+schema = make_executable_schema(
+    type_defs, mutations, queries, snake_case_fallback_resolvers
+)
+
+
+# Setup Routes
 
 @app.route("/database")
 def database():
@@ -29,23 +46,12 @@ def database():
             result[table.name][column.name] = type(column.type).__name__
     return result
 
-#Add comment to test repo
+
+# Add comment to test repo
 @app.route("/")
 def hello_world():
-    return {"message":"Hello World...in JSON....FROM FLASK!!"}
+    return {"message": "Hello World...in JSON....FROM FLASK!!"}
 
-
-from ariadne import load_schema_from_path, make_executable_schema, \
-    graphql_sync, snake_case_fallback_resolvers, ObjectType
-from ariadne.constants import PLAYGROUND_HTML
-from flask import request, jsonify
-from resolvers.mutations import mutations
-from resolvers.queries import queries
-
-type_defs = load_schema_from_path("/var/www/fridge/api/schema.gql")
-schema = make_executable_schema(
-    type_defs, mutations, queries, snake_case_fallback_resolvers
-)
 
 @app.route("/graphql", methods=["GET"])
 def graphql_playground():

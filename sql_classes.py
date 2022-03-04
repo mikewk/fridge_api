@@ -1,14 +1,15 @@
 from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func
 from sqlalchemy.orm import relationship
 from db import get_db
-import configparser
+
 db = get_db()
 Base = db.Model
 
 users_households_association = Table('users_households', Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
-    Column('household_id', Integer, ForeignKey('households.id', ondelete='CASCADE'))
+        Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
+        Column('household_id', Integer, ForeignKey('households.id', ondelete='CASCADE'))
 )
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -17,18 +18,20 @@ class User(Base):
     email = Column(String(255))
     passwordHash = Column(String(256))
     fullName = Column(String(100))
-    lastLogin=Column(DateTime(timezone=True))
-    favoriteStorageId=Column(Integer, ForeignKey("storages.id"), nullable=True)
+    lastLogin = Column(DateTime(timezone=True))
+    favoriteStorageId = Column(Integer, ForeignKey("storages.id"), nullable=True)
     
     favoriteStorage = relationship("Storage", uselist=False)
     households = relationship("Household", secondary=users_households_association)
     ownedHouseholds = relationship("Household", foreign_keys="Household.ownerId")
+
     def to_dict(self):
         return {
             "id": self.id,
             "email": self.email,
             "name": self.fullName
         }
+
 
 class Household(Base):
     __tablename__ = "households"
@@ -43,7 +46,6 @@ class Household(Base):
     storages = relationship("Storage", back_populates="household")
     
     def to_dict(self):
-        
         return {
             "id": self.id,
             "name": self.name,
@@ -51,7 +53,8 @@ class Household(Base):
             "owner": self.owner.to_dict(),
             "storages": map(lambda x: x.to_dict(), self.storages)
         }
-    
+
+
 class Storage(Base):
     __tablename__ = "storages"
     
@@ -64,14 +67,14 @@ class Storage(Base):
     foodItems = relationship("FoodItem", back_populates="storage")
     
     def to_dict(self):
-        
         return {
             "id": self.id,
             "name": self.name,
             "type": self.type,
-            "foodItems": "" #TODO Fix this
+            "foodItems": ""  # TODO Fix this
         }
-    
+
+
 class FoodItem(Base):
     __tablename__ = "food_items"
     
@@ -86,6 +89,7 @@ class FoodItem(Base):
     enteredBy = relationship("User")
     tags = relationship("Tag", back_populates="foodItem")
 
+
 class Tag(Base):
     __tablename__ = "tags"
     
@@ -93,4 +97,3 @@ class Tag(Base):
     foodItemId = Column(Integer, ForeignKey("food_items.id", ondelete='CASCADE'))
     tag = Column(String(100))
     foodItem = relationship("FoodItem", back_populates="tags")
-

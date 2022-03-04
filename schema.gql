@@ -85,10 +85,10 @@ type Mutation {
     login(email: String!, password: String!): AuthPayload
     
     createHousehold(name: String!, location: String!) : HouseholdsPayload
-    updateHousehold(name: String, location: String, id:Int!) : HouseholdsPayload
+    updateHousehold(name: String, location: String, householdId:Int!) : HouseholdsPayload
     
-    addStorageToHousehold(name: String!, type: String!, householdId: Int!) : StoragesPayload
-    updateStorage(name: String, type:String, storageId: Int!): StoragesPayload
+    addStorageToHousehold(name: String!, storageType: String!, householdId: Int!) : StoragesPayload
+    updateStorage(name: String, storageType:String, storageId: Int!): StoragesPayload
     
     addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String): FoodItemsPayload
     updateFoodItem(name: String, expiration: String, tags: [String]): FoodItemsPayload
