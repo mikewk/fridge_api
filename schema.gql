@@ -1,0 +1,115 @@
+schema {
+    mutation: Mutation
+    query: Query
+}
+
+type User
+{
+    id: Int!
+    email: String!
+    name: String!
+}
+
+type Household
+{
+    id: Int!
+    name: String!
+    location: String!
+    owner: User!
+    storages: [Storage]
+    users: [User]
+}
+
+type Storage
+{
+    id: Int!
+    name: String!
+    type: String!
+    foodItems: [FoodItem]
+}
+
+type FoodItem
+{
+    id: Int!
+    name: String!
+    storageId: Int
+    enteredBy: User!
+    entered: String
+    expiration: String
+    tags: [FoodTags]
+}
+
+type FoodTags
+{
+    tag: String!
+}
+
+type AuthPayload
+{
+    token: String
+    error: String
+}
+
+type HouseholdsPayload
+{
+    households: [Household]
+    error: String
+}
+
+type StoragesPayload
+{
+    storages: [Storage]
+    error: String
+}
+
+type UsersPayload
+{
+    users: [User]
+    error: String
+}
+
+type FoodItemsPayload
+{
+    foodItems: [FoodItem]
+    error: String
+}
+
+type RemovalPayload
+{
+    success: Int!
+    error: String
+}
+
+type Mutation {
+    signup(email: String!, password: String!, name: String!): AuthPayload
+    login(email: String!, password: String!): AuthPayload
+    
+    createHousehold(name: String!, location: String!) : HouseholdsPayload
+    updateHousehold(name: String, location: String, id:Int!) : HouseholdsPayload
+    
+    addStorageToHousehold(name: String!, type: String!, householdId: Int!) : StoragesPayload
+    updateStorage(name: String, type:String, storageId: Int!): StoragesPayload
+    
+    addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String): FoodItemsPayload
+    updateFoodItem(name: String, expiration: String, tags: [String]): FoodItemsPayload
+    addTagsToFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
+    removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
+    moveFoodItemToStorage(foodItemId: Int!, storageId: Int!): FoodItemsPayload
+    
+    addUserToHousehold(userId: Int!, householdId: Int!): UsersPayload
+    
+    removeFoodItem(foodItemId: Int!) : RemovalPayload
+    removeStorage(storageId: Int!) : RemovalPayload
+    removeHousehold(householdId: Int!): RemovalPayload
+    removeUserFromHousehold(userId: Int!, householdId: Int!): RemovalPayload
+}
+
+type Query {
+    getOwnedHouseholds : HouseholdsPayload
+    getMemberHouseholds: HouseholdsPayload
+    getStorages(householdId: Int!): StoragesPayload
+    getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
+    getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload
+    getHouseholdMembers(householdID: Int!) : UsersPayload
+    
+}
