@@ -1,6 +1,7 @@
 import db
 import configparser
 import logging
+import os
 
 from flask import Flask, render_template
 from ariadne import load_schema_from_path, make_executable_schema, \
@@ -8,13 +9,16 @@ from ariadne import load_schema_from_path, make_executable_schema, \
 from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
 from sqlalchemy import *
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # Setup database
 config = configparser.ConfigParser()
-config.read('/var/www/config.ini')
+config.read(os.getenv("CONFIG_PATH"))
 mysql_uri = config["mysql"]["uri"]
 app.config['SQLALCHEMY_DATABASE_URI'] = mysql_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -23,7 +27,7 @@ db.init_app(app)
 from resolvers.mutations import mutations
 from resolvers.queries import queries
 # Setup Resolvers
-type_defs = load_schema_from_path("/var/www/fridge/api/schema.gql")
+type_defs = load_schema_from_path("schema.gql")
 schema = make_executable_schema(
     type_defs, mutations, queries, snake_case_fallback_resolvers
 )

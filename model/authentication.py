@@ -2,13 +2,14 @@ import hashlib
 import jwt
 import binascii
 import configparser
+import os
 from sql_classes import User, Household, Storage
 from sqlalchemy import and_
 from db import get_db
 from datetime import datetime, timedelta
 
 config = configparser.ConfigParser()
-config.read('/var/www/secrets.ini')
+config.read(os.getenv("SECRET_PATH"))
 my_secret = config["auth"]["secret"]
 my_salt = config["auth"]["salt"]
 
