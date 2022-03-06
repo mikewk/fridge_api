@@ -108,7 +108,7 @@ type Mutation {
     updateStorage(name: String, storageType:String, storageId: Int!): StoragesPayload
     
     addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String): FoodItemsPayload
-    updateFoodItem(name: String, expiration: String, tags: [String]): FoodItemsPayload
+    updateFoodItem(foodItemId: Int! name:, String expiration: String): FoodItemsPayload
     addTagsToFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     moveFoodItemToStorage(foodItemId: Int!, storageId: Int!): FoodItemsPayload

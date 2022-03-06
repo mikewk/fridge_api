@@ -23,7 +23,7 @@ class User(Base):
     
     favoriteStorage = relationship("Storage", uselist=False)
     households = relationship("Household", secondary=users_households_association)
-    ownedHouseholds = relationship("Household", foreign_keys="Household.ownerId")
+    ownedHouseholds = relationship("Household", foreign_keys="Household.ownerId", passive_deletes=True)
 
     def to_dict(self):
         return {
@@ -43,7 +43,7 @@ class Household(Base):
     
     owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
     users = relationship("User", secondary=users_households_association, back_populates="households")
-    storages = relationship("Storage", back_populates="household")
+    storages = relationship("Storage", back_populates="household", passive_deletes=True)
     
     def to_dict(self):
         return {
@@ -64,7 +64,7 @@ class Storage(Base):
     householdId = Column(Integer, ForeignKey("households.id", ondelete='CASCADE'))
     
     household = relationship("Household", back_populates="storages", foreign_keys=[householdId])
-    foodItems = relationship("FoodItem", back_populates="storage")
+    foodItems = relationship("FoodItem", back_populates="storage", passive_deletes=True)
     
     def to_dict(self):
         return {
@@ -87,7 +87,7 @@ class FoodItem(Base):
     
     storage = relationship("Storage", back_populates="foodItems")
     enteredBy = relationship("User")
-    tags = relationship("Tag", back_populates="foodItem")
+    tags = relationship("Tag", back_populates="foodItem", passive_deletes=True)
 
     def to_dict(self):
         return {
@@ -99,6 +99,7 @@ class FoodItem(Base):
             "expiration": self.expiration,
             "tags": map(lambda x: x.to_dict(), self.tags)
         }
+
 
 class Tag(Base):
     __tablename__ = "tags"
