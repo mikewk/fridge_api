@@ -6,8 +6,8 @@ schema {
 type User
 {
     id: Int!
-    email: String!
     name: String!
+    email: String
 }
 
 type Household
@@ -41,7 +41,24 @@ type FoodItem
 
 type FoodTags
 {
+    id: Int!
     tag: String!
+}
+
+type Invite
+{
+    id: Int!
+    householdName: String!
+    inviter: User!
+    invitee: User!
+    message: String!
+    status: Int!
+}
+
+type InvitesPayload
+{
+    invites: [Invite]
+    error: String
 }
 
 type AuthPayload
@@ -96,8 +113,10 @@ type Mutation {
     removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     moveFoodItemToStorage(foodItemId: Int!, storageId: Int!): FoodItemsPayload
     
-    addUserToHousehold(userId: Int!, householdId: Int!): UsersPayload
-    
+    inviteUserToHousehold(userId: Int!, householdId: Int!): InvitesPayload
+    acceptHouseholdInvite(inviteId: Int!) : HouseholdsPayload
+    rejectHouseholdInvite(inviteId: Int!) : RemovalPayload
+
     removeFoodItem(foodItemId: Int!) : RemovalPayload
     removeStorage(storageId: Int!) : RemovalPayload
     removeHousehold(householdId: Int!): RemovalPayload
@@ -107,6 +126,7 @@ type Mutation {
 type Query {
     getOwnedHouseholds : HouseholdsPayload
     getMemberHouseholds: HouseholdsPayload
+    getHouseholdInvites : InvitesPayload
     getStorages(householdId: Int!): StoragesPayload
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload

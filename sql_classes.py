@@ -71,7 +71,7 @@ class Storage(Base):
             "id": self.id,
             "name": self.name,
             "type": self.type,
-            "foodItems": ""  # TODO Fix this
+            "foodItems": map(lambda x: x.to_dict(), self.foodItems)
         }
 
 
@@ -89,6 +89,16 @@ class FoodItem(Base):
     enteredBy = relationship("User")
     tags = relationship("Tag", back_populates="foodItem")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "storageId": self.storageId,
+            "enteredBy": self.enteredBy.to_dict(),
+            "entered": str(self.dateEntered),
+            "expiration": self.expiration,
+            "tags": map(lambda x: x.to_dict(), self.tags)
+        }
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -97,3 +107,19 @@ class Tag(Base):
     foodItemId = Column(Integer, ForeignKey("food_items.id", ondelete='CASCADE'))
     tag = Column(String(100))
     foodItem = relationship("FoodItem", back_populates="tags")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "tag": self.tag,
+        }
+
+
+class Invite(Base):
+    __tablename__ = "invites"
+
+    id = Column(Integer, primary_key=True)
+    householdId = Column(Integer, ForeignKey("households.id", ondelete='CASCADE'))
+    invitee = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    message = Column(String(255))
+    status = Column(Integer)

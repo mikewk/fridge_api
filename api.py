@@ -29,7 +29,7 @@ from resolvers.queries import queries
 # Setup Resolvers
 type_defs = load_schema_from_path("schema.gql")
 schema = make_executable_schema(
-    type_defs, mutations, queries, snake_case_fallback_resolvers
+    type_defs, mutations, queries
 )
 
 
@@ -39,6 +39,8 @@ schema = make_executable_schema(
 def database():
     from db import get_db
     d = get_db()
+    d.create_all()
+    d.session.commit()
     m = MetaData(d.engine)
     m.reflect()
     result = {}
