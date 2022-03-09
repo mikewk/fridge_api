@@ -10,10 +10,13 @@ from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
 from sqlalchemy import *
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv(".env")
 
 app = Flask(__name__)
+CORS(app)
+
 logging.basicConfig(level=logging.DEBUG)
 
 # Setup database
