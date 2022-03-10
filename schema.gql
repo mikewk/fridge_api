@@ -127,6 +127,7 @@ type Query {
     getOwnedHouseholds : HouseholdsPayload
     getMemberHouseholds: HouseholdsPayload
     getHouseholdInvites : InvitesPayload
+    getHousehold(householdId: Int!): HouseholdsPayload
     getStorages(householdId: Int!): StoragesPayload
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload

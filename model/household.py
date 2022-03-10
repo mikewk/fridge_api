@@ -58,6 +58,15 @@ def get_member_households(info):
         raise TypeError("validate_user did not return User")
 
 
+def get_household(info, household_id):
+    user = validate_user(info)
+    if user is not None:
+        household = get_household_if_member(household_id, user)
+        return household
+    else:
+        raise TypeError("validate_user did not return User")
+
+
 def add_storage(info, name, storage_type, household_id):
     from api import app
     app.logger.info(household_id)
