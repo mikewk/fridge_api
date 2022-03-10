@@ -3,6 +3,19 @@ from model.authentication import validate_user, get_storage_if_member
 from db import get_db
 
 
+def get_storage(info, storage_id):
+    user = validate_user(info)
+    if user is not None:
+        storage = get_storage_if_member(storage_id, user)
+        if storage is not None:
+            return storage
+        else:
+            raise ValueError("User is not authorized to view this storage")
+
+    else:
+        raise ValueError("User is not authenticated")
+
+
 def update(info, storage_id, name, storage_type):
     user = validate_user(info)
     db = get_db()

@@ -1,5 +1,8 @@
 from model.household import get_owned_households, get_member_households, get_household
 from ariadne import ObjectType, convert_kwargs_to_snake_case
+
+from model.storage import get_storage
+
 query = ObjectType("Query")
 
 
@@ -36,4 +39,16 @@ def resolve_get_member_households(obj, info, household_id):
         payload = {"households": [household_dict], "error": None}
     except Exception as e:
         payload = {"households": None, "error": str(e)}
+    return payload
+
+
+@query.field("getStorage")
+@convert_kwargs_to_snake_case
+def resolve_get_member_households(obj, info, storage_id):
+    try:
+        storage = get_storage(info, storage_id)
+        storage_dict = storage.to_dict()
+        payload = {"storages": [storage_dict], "error": None}
+    except Exception as e:
+        payload = {"storages": None, "error": str(e)}
     return payload
