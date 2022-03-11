@@ -36,14 +36,9 @@ type FoodItem
     enteredBy: User!
     entered: String
     expiration: String
-    tags: [FoodTags]
+    tags: [String]
 }
 
-type FoodTags
-{
-    id: Int!
-    tag: String!
-}
 
 type Invite
 {

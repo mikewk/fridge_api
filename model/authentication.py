@@ -31,7 +31,7 @@ def user_signup(email, password, name):
     # generate jwt
     dt = datetime.now() + timedelta(days=2)
     payload_data = {"id": user.id, "email": user.email, "exp": dt}
-    token = jwt.encode(payload_data, my_secret, algorithm='HS256').decode('UTF-8')
+    token = jwt.encode(payload_data, my_secret, algorithm='HS256')
     return token
 
 
@@ -48,7 +48,7 @@ def user_login(email, password):
     # generate jwt
     dt = datetime.now() + timedelta(days=2)
     payload_data = {"id": user.id, "email": user.email, "exp": dt, "name": user.fullName}
-    token = jwt.encode(payload_data, my_secret, algorithm='HS256').decode('UTF-8')
+    token = jwt.encode(payload_data, my_secret, algorithm='HS256')
     return token
 
 

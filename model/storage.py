@@ -47,7 +47,7 @@ def add_food_item(info, storage_id, name, expiration, tags, entered):
                 food_item.entered = entered
             if expiration is not None:
                 food_item.expiration = expiration
-            if( tags is not None):
+            if tags is not None:
                 # Go through each tag, create a tag, append it to the food item
                 for tag in tags:
                     food_tag = Tag(tag=tag)

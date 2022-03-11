@@ -97,7 +97,7 @@ class FoodItem(Base):
             "enteredBy": self.enteredBy.to_dict(),
             "entered": str(self.dateEntered),
             "expiration": self.expiration,
-            "tags": map(lambda x: x.to_dict(), self.tags)
+            "tags": map(lambda x: x.tag, self.tags)
         }
 
 
