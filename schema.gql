@@ -50,6 +50,12 @@ type Invite
     status: Int!
 }
 
+type Suggestion
+{
+    name: String
+    tags: [String]
+}
+
 type InvitesPayload
 {
     invites: [Invite]
@@ -92,6 +98,12 @@ type RemovalPayload
     error: String
 }
 
+type SuggestionPayload
+{
+    suggestion: Suggestion
+    error: String
+}
+
 type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
@@ -128,5 +140,6 @@ type Query {
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload
     getHouseholdMembers(householdID: Int!) : UsersPayload
+    getSuggestions(image: String) : SuggestionPayload
     
 }

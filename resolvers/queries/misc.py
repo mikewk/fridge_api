@@ -1,3 +1,5 @@
+from time import sleep
+
 from model.household import get_owned_households, get_member_households, get_household
 from ariadne import ObjectType, convert_kwargs_to_snake_case
 
@@ -52,3 +54,18 @@ def resolve_get_member_households(obj, info, storage_id):
     except Exception as e:
         payload = {"storages": None, "error": str(e)}
     return payload
+
+
+@query.field("getSuggestions")
+@convert_kwargs_to_snake_case
+def resolve_get_suggestions(obj, info, image):
+    sleep(3)
+    try:
+        payload = {"suggestion":
+                       {"name": "TODO: Bethany",
+                        "tags": ["Definitely", "Not", "Ai"]},
+                   "error": None}
+    except Exception as e:
+        payload = {"suggestion": None, "error": str(e)}
+    return payload
+
