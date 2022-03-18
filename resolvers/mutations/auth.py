@@ -1,4 +1,4 @@
-from model.authentication import user_signup, user_login
+from model.authentication import user_signup, user_login, update_token
 from ariadne import ObjectType, convert_kwargs_to_snake_case
 
 mutation = ObjectType("Mutation")
@@ -25,4 +25,16 @@ def resolve_login(obj, info, email, password):
     except Exception as e:
         payload = {"token": None, "error": str(e)}
     
+    return payload
+
+
+@mutation.field("getUpdatedToken")
+@convert_kwargs_to_snake_case
+def resolve_get_updated_token(obj, info):
+    try:
+        token = update_token(info)
+        payload = {"token": token, "error": None}
+    except Exception as e:
+        payload = {"token": None, "error": str(e)}
+
     return payload

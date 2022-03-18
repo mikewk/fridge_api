@@ -8,8 +8,9 @@ mutation = ObjectType("Mutation")
 @convert_kwargs_to_snake_case
 def food_item(obj, info, food_item_id):
     try:
-        if remove_food_item(info, food_item_id):
-            return {"success": 1, "error": None}
+        storage_id = remove_food_item(info, food_item_id)
+        if storage_id:
+            return {"success": 1, "id": storage_id, "error": None}
         else:
             return {"success": 0, "error": "Unknown error occurred"}
     except Exception as e:
@@ -27,8 +28,6 @@ def storage(obj, info, storage_id):
     except Exception as e:
         return {"success": 0, "error": str(e)}
 
-    return None
-
 
 @mutation.field("removeHousehold")
 @convert_kwargs_to_snake_case
@@ -40,8 +39,6 @@ def household(obj, info, household_id):
             return {"success": 0, "error": "Unknown error occurred"}
     except Exception as e:
         return {"success": 0, "error": str(e)}
-
-    return None
 
 
 @mutation.field("removeUserFromHousehold")

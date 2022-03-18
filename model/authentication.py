@@ -45,11 +45,24 @@ def user_login(email, password):
     except Exception as e:
         raise e
 
+    return generate_jwt(user)
+
+
+def generate_jwt(user):
     # generate jwt
     dt = datetime.now() + timedelta(days=2)
-    payload_data = {"id": user.id, "email": user.email, "exp": dt, "name": user.fullName}
+    auth_households = [h.folder for h in user.households]
+    payload_data = {"id": user.id, "email": user.email, "exp": dt,
+                    "name": user.fullName, "authHouseholds": auth_households}
     token = jwt.encode(payload_data, my_secret, algorithm='HS256')
     return token
+
+
+def update_token(info):
+    # Get user if token is still valid
+    user = validate_user(info)
+    # generate new token
+    return generate_jwt(user)
 
 
 def validate_user(info):
@@ -61,11 +74,13 @@ def validate_user(info):
         try:
             payload = jwt.decode(token, my_secret, algorithms=["HS256"])
             user_id = payload.get("id")
+
             if user_id is None:
                 raise ValueError("Invalid token - Malformed")
             user = User.query.filter_by(id=user_id).first()
             if user is None:
                 raise ValueError("Invalid token - User Not Found")
+
             return user
         except Exception as e:
             raise e

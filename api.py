@@ -3,9 +3,8 @@ import configparser
 import logging
 import os
 
-from flask import Flask, render_template
-from ariadne import load_schema_from_path, make_executable_schema, \
-    graphql_sync, snake_case_fallback_resolvers
+from flask import Flask
+from ariadne import load_schema_from_path, make_executable_schema, graphql_sync
 from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
 from sqlalchemy import *
@@ -23,21 +22,28 @@ logging.basicConfig(level=logging.DEBUG)
 config = configparser.ConfigParser()
 config.read(os.getenv("CONFIG_PATH"))
 mysql_uri = config["mysql"]["uri"]
+upload_base = config["directories"]["upload"]
+config.read(os.getenv("SECRET_PATH"))
+access_key=config["auth"]["awsid"]
+secret_key=config["auth"]["awssecret"]
+
 app.config['SQLALCHEMY_DATABASE_URI'] = mysql_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-from resolvers.mutations import mutations
-from resolvers.queries import queries
-# Setup Resolvers
-type_defs = load_schema_from_path("schema.gql")
-schema = make_executable_schema(
-    type_defs, mutations, queries
-)
+
+def init_graphql():
+    from resolvers.mutations import mutations
+    from resolvers.queries import queries
+    # Setup Resolvers
+    type_defs = load_schema_from_path("schema.gql")
+    schema = make_executable_schema(
+        type_defs, mutations, queries
+    )
+    return schema
 
 
 # Setup Routes
-
 @app.route("/database")
 def database():
     from db import get_db
@@ -68,14 +74,16 @@ def graphql_playground():
 @app.route("/graphql", methods=["POST"])
 def graphql_server():
     global app
-    app.logger.info("We are in graphql post")
     data = request.get_json()
     success, result = graphql_sync(
-        schema,
+        graphql_schema,
         data,
         context_value=request,
         debug=app.debug
     )
-
     status_code = 200 if success else 400
     return jsonify(result), status_code
+
+
+graphql_schema = init_graphql()
+

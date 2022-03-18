@@ -1,18 +1,34 @@
+import uuid
+import boto3
+
 from sql_classes import User, Household, Storage
 from model.authentication import validate_user, get_household_if_member, get_household_if_owner
 from db import get_db
 
 
 def create_household(info, name, location):
+    from api import config
     user = validate_user(info)
     db = get_db()
     if user is not None:
         try:
-            household = Household(name=name, location=location)
+            folder = str(uuid.uuid1())
+            household = Household(name=name, location=location, folder=folder)
             household.owner = user
             household.users.append(user)
             db.session.add(household)
             db.session.commit()
+
+            access_key = config["auth"]["awsid"]
+            secret_key = config["auth"]["awssecret"]
+
+            s3=boto3.client("s3",
+                            aws_access_key_id=access_key,
+                            aws_secret_access_key=secret_key)
+
+            response = s3.put_object(Bucket="fridge-app-photos-dev", Key=(folder+'/'))
+            print(response)
+
             return household
         except Exception as e:
             raise e

@@ -16,6 +16,7 @@ type Household
     name: String!
     location: String!
     owner: User!
+    folder: String
     storages: [Storage]
     users: [User]
 }
@@ -32,10 +33,11 @@ type FoodItem
 {
     id: Int!
     name: String!
-    storageId: Int
+    storageName: String
     enteredBy: User!
     entered: String
     expiration: String
+    filename: String
     tags: [String]
 }
 
@@ -54,6 +56,7 @@ type Suggestion
 {
     name: String
     tags: [String]
+    filename: String
 }
 
 type InvitesPayload
@@ -94,6 +97,7 @@ type FoodItemsPayload
 
 type RemovalPayload
 {
+    id: Int
     success: Int!
     error: String
 }
@@ -107,6 +111,7 @@ type SuggestionPayload
 type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
+    getUpdatedToken: AuthPayload
     
     createHousehold(name: String!, location: String!) : HouseholdsPayload
     updateHousehold(name: String, location: String, householdId:Int!) : HouseholdsPayload
@@ -114,7 +119,7 @@ type Mutation {
     addStorageToHousehold(name: String!, storageType: String!, householdId: Int!) : StoragesPayload
     updateStorage(name: String, storageType:String, storageId: Int!): StoragesPayload
     
-    addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String): FoodItemsPayload
+    addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String, filename: String): FoodItemsPayload
     updateFoodItem(foodItemId: Int! name: String, expiration: String, tags: [String] ): FoodItemsPayload
     addTagsToFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
@@ -122,6 +127,9 @@ type Mutation {
     
     inviteUserToHousehold(userId: Int!, householdId: Int!): InvitesPayload
     acceptHouseholdInvite(inviteId: Int!) : HouseholdsPayload
+
+    getSuggestions(image: String) : SuggestionPayload
+
     rejectHouseholdInvite(inviteId: Int!) : RemovalPayload
 
     removeFoodItem(foodItemId: Int!) : RemovalPayload
@@ -140,6 +148,6 @@ type Query {
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload
     getHouseholdMembers(householdID: Int!) : UsersPayload
-    getSuggestions(image: String) : SuggestionPayload
+
     
 }

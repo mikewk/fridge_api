@@ -40,6 +40,7 @@ class Household(Base):
     name = Column(String(255))
     location = Column(String(255))
     ownerId = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    folder = Column(String(37))
     
     owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
     users = relationship("User", secondary=users_households_association, back_populates="households")
@@ -50,6 +51,7 @@ class Household(Base):
             "id": self.id,
             "name": self.name,
             "location": self.location,
+            "folder": self.folder,
             "owner": self.owner.to_dict(),
             "storages": map(lambda x: x.to_dict(), self.storages)
         }
@@ -84,7 +86,8 @@ class FoodItem(Base):
     dateEntered = Column(DateTime(timezone=True), server_default=func.now())
     enteredById = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     expiration = Column(DateTime(timezone=True))
-    
+    filename = Column(String(255))
+
     storage = relationship("Storage", back_populates="foodItems")
     enteredBy = relationship("User")
     tags = relationship("Tag", back_populates="foodItem", passive_deletes=True)
@@ -93,10 +96,11 @@ class FoodItem(Base):
         return {
             "id": self.id,
             "name": self.name,
-            "storageId": self.storageId,
+            "storageName": self.storage.name,
             "enteredBy": self.enteredBy.to_dict(),
             "entered": str(self.dateEntered),
             "expiration": self.expiration,
+            "filename": self.filename,
             "tags": map(lambda x: x.tag, self.tags)
         }
 

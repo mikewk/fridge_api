@@ -9,10 +9,11 @@ def remove_food_item(info, food_item_id):
     item = get_item_if_member(food_item_id, user)
     if item is None:
         raise ValueError("Unable to retrieve FoodItem")
+    storage_id = item.storageId
     db = get_db()
     db.session.delete(item)
     db.session.commit()
-    return True
+    return storage_id
 
 
 def remove_storage(info, storage_id):
