@@ -8,6 +8,9 @@ type User
     id: Int!
     name: String!
     email: String
+    defaultHousehold: Household
+    memberHouseholds: [Household]
+    ownedHouseholds: [Household]
 }
 
 type Household
@@ -33,7 +36,7 @@ type FoodItem
 {
     id: Int!
     name: String!
-    storageName: String
+    storage: Storage
     enteredBy: User!
     entered: String
     expiration: String
@@ -68,6 +71,7 @@ type InvitesPayload
 type AuthPayload
 {
     token: String
+    user: User
     error: String
 }
 

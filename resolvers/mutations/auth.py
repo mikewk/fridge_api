@@ -8,8 +8,8 @@ mutation = ObjectType("Mutation")
 @convert_kwargs_to_snake_case
 def resolve_signup(obj, info, email, password, name):
     try:
-        token = user_signup(email, password, name)
-        payload = {"token": token, "error": None}
+        [token, user] = user_signup(email, password, name)
+        payload = {"token": token, "user": user, "error": None}
     except Exception as e:
         payload = {"token": None, "error": str(e)}
         
@@ -20,8 +20,8 @@ def resolve_signup(obj, info, email, password, name):
 @convert_kwargs_to_snake_case
 def resolve_login(obj, info, email, password):
     try:
-        token = user_login(email, password)
-        payload = {"token": token, "error": None}
+        [token, user] = user_login(email, password)
+        payload = {"token": token, "user": user.to_dict(), "error": None}
     except Exception as e:
         payload = {"token": None, "error": str(e)}
     

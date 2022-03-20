@@ -32,7 +32,7 @@ def user_signup(email, password, name):
     dt = datetime.now() + timedelta(days=2)
     payload_data = {"id": user.id, "email": user.email, "exp": dt}
     token = jwt.encode(payload_data, my_secret, algorithm='HS256')
-    return token
+    return [token, user]
 
 
 def user_login(email, password):
@@ -45,7 +45,7 @@ def user_login(email, password):
     except Exception as e:
         raise e
 
-    return generate_jwt(user)
+    return [generate_jwt(user), user]
 
 
 def generate_jwt(user):

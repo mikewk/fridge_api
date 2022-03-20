@@ -20,16 +20,28 @@ class User(Base):
     fullName = Column(String(100))
     lastLogin = Column(DateTime(timezone=True))
     favoriteStorageId = Column(Integer, ForeignKey("storages.id"), nullable=True)
+    defaultHouseholdId = Column(Integer, ForeignKey("households.id"), nullable=True)
     
     favoriteStorage = relationship("Storage", uselist=False)
     households = relationship("Household", secondary=users_households_association)
     ownedHouseholds = relationship("Household", foreign_keys="Household.ownerId", passive_deletes=True)
+    defaultHousehold = relationship("Household", uselist=False, foreign_keys="User.defaultHouseholdId")
 
     def to_dict(self):
         return {
             "id": self.id,
             "email": self.email,
-            "name": self.fullName
+            "name": self.fullName,
+            "defaultHousehold": self.defaultHousehold.to_dict() if self.defaultHousehold else None,
+            "memberHouseholds": map(lambda x: x.to_dict_no_recursion(), self.households),
+            "ownedHouseholds": map(lambda x: x.to_dict_no_recursion(), self.ownedHouseholds)
+        }
+
+    def to_dict_no_recursion(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "name": self.fullName,
         }
 
 
@@ -52,7 +64,16 @@ class Household(Base):
             "name": self.name,
             "location": self.location,
             "folder": self.folder,
-            "owner": self.owner.to_dict(),
+            "owner": self.owner.to_dict_no_recursion(),
+            "storages": map(lambda x: x.to_dict(), self.storages)
+        }
+
+    def to_dict_no_recursion(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "location": self.location,
+            "folder": self.folder,
             "storages": map(lambda x: x.to_dict(), self.storages)
         }
 
@@ -76,6 +97,14 @@ class Storage(Base):
             "foodItems": map(lambda x: x.to_dict(), self.foodItems)
         }
 
+    def to_dict_no_recursion(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "type": self.type,
+            "foodItems": []
+        }
+
 
 class FoodItem(Base):
     __tablename__ = "food_items"
@@ -96,7 +125,7 @@ class FoodItem(Base):
         return {
             "id": self.id,
             "name": self.name,
-            "storageName": self.storage.name,
+            "storage": self.storage.to_dict_no_recursion(),
             "enteredBy": self.enteredBy.to_dict(),
             "entered": str(self.dateEntered),
             "expiration": self.expiration,
