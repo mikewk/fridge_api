@@ -16,7 +16,7 @@ my_salt = config["auth"]["salt"]
 
 def user_signup(email, password, name):
     db = get_db()
-    salt = email + my_salt  # Not as good as a random salt, but we just won't let users change their username
+    salt = email.lower() + my_salt  # Not as good as a random salt, but we just won't let users change their username
     try:
         user = User.query.filter_by(email=email).first()
         if user is not None:
@@ -36,7 +36,7 @@ def user_signup(email, password, name):
 
 
 def user_login(email, password):
-    salt = email + my_salt
+    salt = email.lower() + my_salt
     try:
         my_hash = binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 100000))
         user = User.query.filter_by(email=email, passwordHash=my_hash).first()
