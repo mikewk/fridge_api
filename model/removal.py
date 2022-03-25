@@ -2,6 +2,7 @@ import boto3
 
 from model.authentication import validate_user, get_item_if_member, get_storage_if_member, get_household_if_owner
 from db import get_db
+from sql_classes import Invite
 
 
 def remove_food_item(info, food_item_id):
@@ -51,5 +52,23 @@ def remove_household(info, household_id):
         raise ValueError("Unable to retrieve Household")
     db = get_db()
     db.session.delete(household)
+    db.session.commit()
+    return True
+
+
+def delete_household_invite(info, invite_id):
+    owner = validate_user(info)
+    if owner is None:
+        raise Exception("Owner is not a valid user")
+
+    invite = Invite.query.filter_by(id=invite_id).first()
+    household_id = invite.householdId
+    household = get_household_if_owner(household_id, owner)
+
+    if household is None:
+        raise Exception("User not authorized to delete invites from this household")
+
+    db = get_db()
+    db.session.delete(invite)
     db.session.commit()
     return True

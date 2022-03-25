@@ -47,10 +47,10 @@ type FoodItem
 
 type Invite
 {
-    id: Int!
+    id: String!
     householdName: String!
-    inviter: User!
-    invitee: User!
+    inviteeName: String
+    inviterName: String!
     message: String!
     status: Int!
 }
@@ -115,6 +115,12 @@ type SuggestionPayload
 type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
+
+    editUsername(email: String!, password: String!): AuthPayload
+    editPassword(password: String!, oldPassword: String!): AuthPayload
+
+    changeDefaultHousehold(householdId: Int!): UsersPayload
+
     getUpdatedToken: AuthPayload
     
     createHousehold(name: String!, location: String!) : HouseholdsPayload
@@ -128,13 +134,13 @@ type Mutation {
     addTagsToFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     moveFoodItemToStorage(foodItemId: Int!, storageId: Int!): FoodItemsPayload
-    
-    inviteUserToHousehold(userId: Int!, householdId: Int!): InvitesPayload
-    acceptHouseholdInvite(inviteId: Int!) : HouseholdsPayload
 
     getSuggestions(image: String) : SuggestionPayload
 
-    rejectHouseholdInvite(inviteId: Int!) : RemovalPayload
+    inviteUserToHousehold(householdId: Int!, message: String!) : InvitesPayload
+    acceptHouseholdInvite(inviteId: String!) : HouseholdsPayload
+    rejectHouseholdInvite(inviteId: String!) : RemovalPayload
+    deleteInvite(inviteId: String!) : RemovalPayload
 
     removeFoodItem(foodItemId: Int!) : RemovalPayload
     removeStorage(storageId: Int!) : RemovalPayload
@@ -145,13 +151,14 @@ type Mutation {
 type Query {
     getOwnedHouseholds : HouseholdsPayload
     getMemberHouseholds: HouseholdsPayload
-    getHouseholdInvites : InvitesPayload
     getHousehold(householdId: Int!): HouseholdsPayload
     getStorages(householdId: Int!): StoragesPayload
     getStorage(storageId: Int!): StoragesPayload
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload
-    getHouseholdMembers(householdID: Int!) : UsersPayload
-
+    getHouseholdMembers(householdId: Int!) : UsersPayload
+    getInvites(householdId: Int!) : InvitesPayload
+    getInvite(inviteId: String!): InvitesPayload
+    getInviteInformation(inviteId: String!): InvitesPayload
     
 }

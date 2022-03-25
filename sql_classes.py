@@ -57,6 +57,7 @@ class Household(Base):
     owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
     users = relationship("User", secondary=users_households_association, back_populates="households")
     storages = relationship("Storage", back_populates="household", passive_deletes=True)
+    invites = relationship("Invite", back_populates="household", passive_deletes=True)
     
     def to_dict(self):
         return {
@@ -152,8 +153,21 @@ class Tag(Base):
 class Invite(Base):
     __tablename__ = "invites"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String(38), primary_key=True)
     householdId = Column(Integer, ForeignKey("households.id", ondelete='CASCADE'))
-    invitee = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    inviteeId = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     message = Column(String(255))
     status = Column(Integer)
+
+    household = relationship("Household", uselist=False, back_populates="invites")
+    invitee = relationship("User", uselist=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "householdName": self.household.name,
+            "message": self.message,
+            "status": self.status,
+            "inviteeName": self.invitee.name if self.invitee else "",
+            "inviterName": self.household.owner.fullName
+        }

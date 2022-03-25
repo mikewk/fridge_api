@@ -14,7 +14,9 @@ from flask_cors import CORS
 load_dotenv(".env")
 
 app = Flask(__name__)
+app.debug = true
 CORS(app)
+
 
 logging.basicConfig(level=logging.DEBUG)
 

@@ -1,5 +1,6 @@
 from ariadne import ObjectType, convert_kwargs_to_snake_case
-from model.removal import remove_food_item, remove_storage, remove_household
+from model.removal import remove_food_item, remove_storage, remove_household, delete_household_invite
+from resolvers.mutations.user import mutation
 
 mutation = ObjectType("Mutation")
 
@@ -45,3 +46,14 @@ def household(obj, info, household_id):
 @convert_kwargs_to_snake_case
 def user_from_household(obj, info):
     return None
+
+
+@mutation.field("deleteInvite")
+@convert_kwargs_to_snake_case
+def resolve_cancel_invite(obj, info, invite_id):
+    try:
+        delete_household_invite(info, invite_id)
+        payload = {"id": invite_id, "success": 1, "error": None}
+    except Exception as e:
+        payload = {"id": invite_id, "success": 0, "error": None}
+    return payload
