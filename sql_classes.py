@@ -33,8 +33,8 @@ class User(Base):
             "email": self.email,
             "name": self.fullName,
             "defaultHousehold": self.defaultHousehold.to_dict() if self.defaultHousehold else None,
-            "memberHouseholds": map(lambda x: x.to_dict_no_recursion(), self.households),
-            "ownedHouseholds": map(lambda x: x.to_dict_no_recursion(), self.ownedHouseholds)
+            "memberHouseholds": map(lambda x: x.to_dict(), self.households),
+            "ownedHouseholds": map(lambda x: x.to_dict(), self.ownedHouseholds)
         }
 
     def to_dict_no_recursion(self):
