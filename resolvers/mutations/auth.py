@@ -9,7 +9,7 @@ mutation = ObjectType("Mutation")
 def resolve_signup(obj, info, email, password, name):
     try:
         [token, user] = user_signup(email, password, name)
-        payload = {"token": token, "user": user, "error": None}
+        payload = {"token": token, "user": user.to_dict(), "error": None}
     except Exception as e:
         payload = {"token": None, "error": str(e)}
         
