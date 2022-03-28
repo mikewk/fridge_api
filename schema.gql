@@ -71,7 +71,6 @@ type InvitesPayload
 type AuthPayload
 {
     token: String
-    user: User
     error: String
 }
 
@@ -119,7 +118,7 @@ type Mutation {
     editUsername(email: String!, password: String!): AuthPayload
     editPassword(password: String!, oldPassword: String!): AuthPayload
 
-    changeDefaultHousehold(householdId: Int!): UsersPayload
+    changeDefaultHousehold(householdId: Int!): HouseholdsPayload
 
     getUpdatedToken: AuthPayload
     
@@ -156,6 +155,7 @@ type Query {
     getStorage(storageId: Int!): StoragesPayload
     getFoodItemsInStorage(storageId: Int!, tagFilter:String): FoodItemsPayload
     getFoodItemsInHousehold(householdId: Int!, tagFilter:String): FoodItemsPayload
+    getUser : UsersPayload
     getHouseholdMembers(householdId: Int!) : UsersPayload
     getInvites(householdId: Int!) : InvitesPayload
     getInvite(inviteId: String!): InvitesPayload

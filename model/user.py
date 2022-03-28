@@ -6,7 +6,14 @@ from sql_classes import User, Invite
 from db import get_db
 
 
-def get_user(user_id):
+def get_user(info):
+    user = validate_user(info)
+    if user is None:
+        raise Exception("Not a valid user")
+    return user
+
+
+def get_user_by_id(user_id):
     user = User.query.filter_by(id=user_id).first()
     return user
 
@@ -22,7 +29,7 @@ def change_default_household(info, household_id):
     db = get_db()
     user.defaultHousehold = household
     db.session.commit()
-    return user
+    return household
 
 
 def invite_user_to_household(info, household_id, message):

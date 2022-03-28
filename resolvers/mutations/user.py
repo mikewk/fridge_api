@@ -10,8 +10,8 @@ mutation = ObjectType("Mutation")
 @convert_kwargs_to_snake_case
 def resolve_default_household(obj, info, household_id):
     try:
-        user = change_default_household(info, household_id)
-        payload = {"users": [user.to_dict()], "error": None}
+        household = change_default_household(info, household_id)
+        payload = {"households": [household.to_dict()], "error": None}
     except Exception as e:
         payload = {"households": None, "error": str(e)}
 

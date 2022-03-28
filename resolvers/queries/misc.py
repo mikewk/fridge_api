@@ -3,6 +3,7 @@ from ariadne import ObjectType, convert_kwargs_to_snake_case
 
 from model.invites import get_invites, get_invite
 from model.storage import get_storage
+from model.user import get_user
 
 query = ObjectType("Query")
 
@@ -81,3 +82,14 @@ def resolve_get_invite(obj, info, invite_id):
 
     return payload
 
+
+@query.field("getUser")
+@convert_kwargs_to_snake_case
+def resolve_get_invite(obj, info):
+    try:
+        user = get_user(info)
+        payload = {"users": [user.to_dict()], "error": None}
+    except Exception as e:
+        payload = {"users": None, "error": str(e)}
+
+    return payload
