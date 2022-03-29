@@ -24,6 +24,7 @@ class User(Base):
     lastLogin = Column(DateTime(timezone=True))
     favoriteStorageId = Column(Integer, ForeignKey("storages.id"), nullable=True)
     defaultHouseholdId = Column(Integer, ForeignKey("households.id"), nullable=True)
+    salt = Column(String(37))
     
     favoriteStorage = relationship("Storage", uselist=False)
     households = relationship("Household", secondary=users_households_association)
@@ -77,6 +78,7 @@ class Household(Base):
             "location": self.location,
             "folder": self.folder,
             "owner": self.owner.to_dict_no_recursion(),
+            "users": map(lambda x: x.to_dict_no_recursion(), self.users),
             "storages": map(lambda x: x.to_dict(), self.storages)
         }
 

@@ -1,4 +1,6 @@
 import hashlib
+import uuid
+
 import jwt
 import binascii
 import configparser
@@ -16,13 +18,14 @@ my_salt = config["auth"]["salt"]
 
 def user_signup(email, password, name):
     db = get_db()
-    salt = email.lower() + my_salt  # Not as good as a random salt, but we just won't let users change their username
+    salt_base = str(uuid.uuid1())
+    salt = salt_base + my_salt  # Now as good as a random salt
     try:
         user = User.query.filter_by(email=email).first()
         if user is not None:
             raise ValueError("Email address already has an account")
-        my_hash = binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 100000))
-        user = User(email=email, passwordHash=my_hash, fullName=name)
+        my_hash = do_hash(password, salt)
+        user = User(email=email, passwordHash=my_hash, fullName=name, salt=salt)
         db.session.add(user)
         db.session.commit()
     except Exception as e:
@@ -36,16 +39,22 @@ def user_signup(email, password, name):
 
 
 def user_login(email, password):
-    salt = email.lower() + my_salt
     try:
-        my_hash = binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 100000))
-        user = User.query.filter_by(email=email, passwordHash=my_hash).first()
+        user = User.query.filter_by(email=email).first()
         if user is None:
+            raise ValueError("Invalid credentials supplied")
+        salt = user.salt + my_salt
+        my_hash = do_hash(password, salt)
+        if user.passwordHash != my_hash:
             raise ValueError("Invalid credentials supplied")
     except Exception as e:
         raise e
 
     return generate_jwt(user)
+
+
+def do_hash(password, salt):
+    return binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 100000))
 
 
 def generate_jwt(user):
