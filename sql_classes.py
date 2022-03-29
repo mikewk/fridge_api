@@ -1,6 +1,9 @@
-from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func
+from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func, event
 from sqlalchemy.orm import relationship
+
+from api import access_key, secret_key
 from db import get_db
+import boto3
 
 db = get_db()
 Base = db.Model
@@ -58,7 +61,15 @@ class Household(Base):
     users = relationship("User", secondary=users_households_association, back_populates="households")
     storages = relationship("Storage", back_populates="household", passive_deletes=True)
     invites = relationship("Invite", back_populates="household", passive_deletes=True)
-    
+
+    def delete(self):
+        # Remove item from S3
+        print("Deleting "+self.folder+" from S3\n")
+        s3 = boto3.client("s3",
+                          aws_access_key_id=access_key,
+                          aws_secret_access_key=secret_key)
+        s3.delete_object(Bucket="fridge-app-photos-dev", Key=self.folder)
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -89,7 +100,13 @@ class Storage(Base):
     
     household = relationship("Household", back_populates="storages", foreign_keys=[householdId])
     foodItems = relationship("FoodItem", back_populates="storage", passive_deletes=True)
-    
+
+    def delete(self):
+        print("Deleting all food items in "+self.name)
+        # Remove food items from S3
+        for foodItem in self.foodItems:
+            foodItem.delete()
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -121,6 +138,14 @@ class FoodItem(Base):
     storage = relationship("Storage", back_populates="foodItems")
     enteredBy = relationship("User")
     tags = relationship("Tag", back_populates="foodItem", passive_deletes=True)
+
+    def delete(self):
+        # Remove item from S3
+        print("Deleting "+self.filename+" from S3\n")
+        s3 = boto3.client("s3",
+                          aws_access_key_id=access_key,
+                          aws_secret_access_key=secret_key)
+        s3.delete_object(Bucket="fridge-app-photos-dev", Key=self.filename)
 
     def to_dict(self):
         return {
@@ -171,3 +196,18 @@ class Invite(Base):
             "inviteeName": self.invitee.fullName if self.invitee else "",
             "inviterName": self.household.owner.fullName
         }
+
+
+@event.listens_for(FoodItem, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    target.delete()
+
+
+@event.listens_for(Storage, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    target.delete()
+
+
+@event.listens_for(Household, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    target.delete()

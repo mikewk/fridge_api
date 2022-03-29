@@ -2,6 +2,7 @@ import db
 import configparser
 import logging
 import os
+import boto3
 
 from flask import Flask
 from ariadne import load_schema_from_path, make_executable_schema, graphql_sync
@@ -19,6 +20,13 @@ CORS(app)
 
 
 logging.basicConfig(level=logging.DEBUG)
+
+# setup S3 logging levels
+logging.getLogger('boto3').setLevel(logging.WARNING)
+logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('nose').setLevel(logging.WARNING)
+logging.getLogger('s3transfer').setLevel(logging.WARNING)
+
 
 # Setup database
 config = configparser.ConfigParser()

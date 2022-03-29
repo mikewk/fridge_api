@@ -1,7 +1,8 @@
 from ariadne import ObjectType, convert_kwargs_to_snake_case
 
+from model.removal import leave_household
 from model.user import change_default_household, reject_household_invite, accept_household_invite, \
-    remove_user_from_household, invite_user_to_household
+    invite_user_to_household
 
 mutation = ObjectType("Mutation")
 
@@ -52,13 +53,11 @@ def resolver_reject_invite(obj, info, invite_id):
     return payload
 
 
-@mutation.field("removeUserFromHousehold")
+@mutation.field("leaveHousehold")
 @convert_kwargs_to_snake_case
-def resolve_remove_user(obj, info, user_id):
-
+def resolve_leave_household(obj, info, household_id):
     try:
-        remove_user_from_household(info, user_id)
-        payload = {"id": user_id, "success": 1, "error": None}
+        payload = leave_household(info, household_id)
+        return {"success": payload, "error": None}
     except Exception as e:
-        payload = {"id": user_id, "success": 0, "error": str(e)}
-    return payload
+        return {"success": False, "error": str(e)}

@@ -96,8 +96,3 @@ def reject_household_invite(info, invite_id):
 
     db.session.commit()
     return True
-
-
-def remove_user_from_household(info, user_id):
-    pass
-

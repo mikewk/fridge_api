@@ -145,6 +145,7 @@ type Mutation {
     removeStorage(storageId: Int!) : RemovalPayload
     removeHousehold(householdId: Int!): RemovalPayload
     removeUserFromHousehold(userId: Int!, householdId: Int!): RemovalPayload
+    leaveHousehold(householdId: Int!) : RemovalPayload
 }
 
 type Query {
