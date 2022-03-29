@@ -69,6 +69,9 @@ def accept_household_invite(info, invite_id):
         invite.status = 1
         invite.invitee = user
         invite.household.users.append(user)
+        if user.defaultHousehold is None:
+            user.defaultHousehold = invite.household
+
         db = get_db()
         db.session.commit()
     elif invite.status == 4:

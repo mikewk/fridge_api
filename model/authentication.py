@@ -58,7 +58,7 @@ def generate_jwt(user):
     return token
 
 
-def update_token(info):
+def refresh_token(info):
     # Get user if token is still valid
     user = validate_user(info)
     # generate new token

@@ -19,6 +19,10 @@ def create_household(info, name, location):
             db.session.add(household)
             db.session.commit()
 
+            if user.defaultHousehold is None:
+                user.defaultHousehold = household
+
+            db.session.commit()
             access_key = config["auth"]["awsid"]
             secret_key = config["auth"]["awssecret"]
 

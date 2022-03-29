@@ -168,6 +168,6 @@ class Invite(Base):
             "householdName": self.household.name,
             "message": self.message,
             "status": self.status,
-            "inviteeName": self.invitee.name if self.invitee else "",
+            "inviteeName": self.invitee.fullName if self.invitee else "",
             "inviterName": self.household.owner.fullName
         }

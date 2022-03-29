@@ -34,19 +34,20 @@ def resolve_get_member_households(obj, info):
 
 @query.field("getHousehold")
 @convert_kwargs_to_snake_case
-def resolve_get_member_households(obj, info, household_id):
+def resolve_get_household(obj, info, household_id):
     try:
         household = get_household(info, household_id)
-        household_dict = household.to_dict()
-        payload = {"households": [household_dict], "error": None}
+        payload = {"households": [household.to_dict()], "error": None}
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         payload = {"households": None, "error": str(e)}
     return payload
 
 
 @query.field("getStorage")
 @convert_kwargs_to_snake_case
-def resolve_get_member_households(obj, info, storage_id):
+def resolve_get_storage(obj, info, storage_id):
     try:
         storage = get_storage(info, storage_id)
         storage_dict = storage.to_dict()

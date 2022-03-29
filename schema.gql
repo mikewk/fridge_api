@@ -120,7 +120,7 @@ type Mutation {
 
     changeDefaultHousehold(householdId: Int!): HouseholdsPayload
 
-    getUpdatedToken: AuthPayload
+    refreshToken: AuthPayload
     
     createHousehold(name: String!, location: String!) : HouseholdsPayload
     updateHousehold(name: String, location: String, householdId:Int!) : HouseholdsPayload
