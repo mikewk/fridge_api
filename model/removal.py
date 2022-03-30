@@ -1,5 +1,4 @@
 import boto3
-
 from model.authentication import validate_user, get_item_if_member, get_storage_if_member, get_household_if_owner, \
     get_household_if_member
 from db import get_db
@@ -47,10 +46,8 @@ def remove_household(info, household_id):
     db = get_db()
     db.session.delete(household)
     db.session.commit()
-    if user.defaultHousehold is None:
-        if user.households is not None and len(user.households) > 0:
-            user.defaultHousehold = user.households[0]
-        db.session.commit()
+    reset_default_household(user)
+
     return True
 
 
@@ -89,6 +86,10 @@ def remove_user_from_household(info, user_id, household_id):
         raise Exception("User to remove not found")
 
     household.users.remove(user)
+    if user.defaultHousehold == household:
+        user.defaultHousehold = None
+        reset_default_household(user)
+
     db = get_db()
     db.session.commit()
     return True
@@ -107,6 +108,15 @@ def leave_household(info, household_id):
         raise Exception("Owner is not allowed to leave the household")
 
     household.users.remove(user)
+    reset_default_household(user)
+
     db = get_db()
     db.session.commit()
     return True
+
+def reset_default_household(user):
+    if user.defaultHousehold is None:
+        if user.households is not None and len(user.households) > 0:
+            user.defaultHousehold = user.households[0]
+        db = get_db()
+        db.session.commit()
