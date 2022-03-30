@@ -80,11 +80,14 @@ def get_member_households(info):
 
 def get_household(info, household_id):
     user = validate_user(info)
-    if user is not None:
-        household = get_household_if_member(household_id, user)
-        return household
-    else:
-        raise TypeError("validate_user did not return User")
+    if user is None:
+        raise TypeError("User is not valid")
+
+    household = get_household_if_member(household_id, user)
+    if household is None:
+        raise TypeError("User not authorized to access this household")
+
+    return household
 
 
 def add_storage(info, name, storage_type, household_id):
@@ -96,7 +99,6 @@ def add_storage(info, name, storage_type, household_id):
         household = get_household_if_member(household_id, user)
         if household is not None:
             try:
-
                 storage = Storage(name=name, type=storage_type)
                 storage.household = household
                 db.session.add(storage)

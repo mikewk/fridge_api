@@ -25,7 +25,7 @@ def user_signup(email, password, name):
         if user is not None:
             raise ValueError("Email address already has an account")
         my_hash = do_hash(password, salt)
-        user = User(email=email, passwordHash=my_hash, fullName=name, salt=salt)
+        user = User(email=email, passwordHash=my_hash, fullName=name, salt=salt_base)
         db.session.add(user)
         db.session.commit()
     except Exception as e:
@@ -42,11 +42,13 @@ def user_login(email, password):
     try:
         user = User.query.filter_by(email=email).first()
         if user is None:
-            raise ValueError("Invalid credentials supplied")
+            raise ValueError("Invalid credentials supplied - username")
         salt = user.salt + my_salt
         my_hash = do_hash(password, salt)
-        if user.passwordHash != my_hash:
-            raise ValueError("Invalid credentials supplied")
+        if user.passwordHash != str(my_hash):
+            print(user.passwordHash);
+            print(str(my_hash))
+            raise ValueError("Invalid credentials supplied - password")
     except Exception as e:
         raise e
 
@@ -54,7 +56,8 @@ def user_login(email, password):
 
 
 def do_hash(password, salt):
-    return binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode(), 100000))
+    return binascii.hexlify(hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'),
+                                                salt.encode(), 100000)).decode("ascii")
 
 
 def generate_jwt(user):

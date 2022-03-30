@@ -13,9 +13,9 @@ def food_item(obj, info, food_item_id):
         if storage_id:
             return {"success": 1, "id": storage_id, "error": None}
         else:
-            return {"success": 0, "error": "Unknown error occurred"}
+            return {"success": 0, "error": "Unknown error occurred", "id": storage_id}
     except Exception as e:
-        return {"success": 0, "error": str(e)}
+        return {"success": 0, "error": str(e), "id": storage_id}
 
 
 @mutation.field("removeStorage")
@@ -23,23 +23,23 @@ def food_item(obj, info, food_item_id):
 def storage(obj, info, storage_id):
     try:
         if remove_storage(info, storage_id):
-            return {"success": 1, "error": None}
+            return {"success": 1, "error": None, "id": storage_id}
         else:
-            return {"success": 0, "error": "Unknown error occurred"}
+            return {"success": 0, "error": "Unknown error occurred", "id": storage_id}
     except Exception as e:
-        return {"success": 0, "error": str(e)}
+        return {"success": 0, "error": str(e), "id": storage_id}
 
 
 @mutation.field("removeHousehold")
 @convert_kwargs_to_snake_case
-def household(obj, info, household_id):
+def resolve_remove_household(obj, info, household_id):
     try:
         if remove_household(info, household_id):
-            return {"success": 1, "error": None}
+            return {"success": 1, "error": None, "id": household_id}
         else:
-            return {"success": 0, "error": "Unknown error occurred"}
+            return {"success": 0, "error": "Unknown error occurred", "id": household_id}
     except Exception as e:
-        return {"success": 0, "error": str(e)}
+        return {"success": 0, "error": str(e), "id": household_id}
 
 
 @mutation.field("removeUserFromHousehold")
@@ -47,9 +47,9 @@ def household(obj, info, household_id):
 def resolve_remove_user_from_household(obj, info, user_id, household_id):
     try:
         payload = remove_user_from_household(info, user_id, household_id)
-        return {"success": payload, "error": None}
+        return {"success": payload, "error": None, "id": user_id}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": str(e), "id": user_id}
 
 
 @mutation.field("deleteInvite")

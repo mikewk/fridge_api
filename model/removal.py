@@ -47,6 +47,10 @@ def remove_household(info, household_id):
     db = get_db()
     db.session.delete(household)
     db.session.commit()
+    if user.defaultHousehold is None:
+        if user.households is not None and len(user.households) > 0:
+            user.defaultHousehold = user.households[0]
+        db.session.commit()
     return True
 
 
