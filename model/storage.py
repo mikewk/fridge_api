@@ -44,7 +44,7 @@ def add_food_item(info, storage_id, name, expiration, tags, entered, filename):
     user = validate_user(info)
     db = get_db()
     if user is not None:
-        storage = get_storage_if_member(storage_id, user) # type: Storage
+        storage = get_storage_if_member(storage_id, user)  # type: Storage
         if storage is not None:
             # get household from storage
             household = storage.household
@@ -61,6 +61,7 @@ def add_food_item(info, storage_id, name, expiration, tags, entered, filename):
                 food_item.entered = entered
             if expiration is not None:
                 food_item.expiration = expiration
+
             if tags is not None:
                 # Go through each tag, create a tag, append it to the food item
                 for tag in tags:

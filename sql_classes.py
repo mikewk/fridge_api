@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime, timezone
+
 from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func, event
 from sqlalchemy.orm import relationship
 
@@ -131,15 +133,20 @@ class Storage(Base):
         }
 
 
+def default_expiration():
+    expiration = datetime.now(timezone.utc) + timedelta(days=7)
+    return expiration
+
+
 class FoodItem(Base):
     __tablename__ = "food_items"
     
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     storageId = Column(Integer, ForeignKey("storages.id", ondelete='CASCADE'))
-    dateEntered = Column(DateTime(timezone=True), server_default=func.now())
+    dateEntered = Column(DateTime(timezone=False), server_default=func.now())
     enteredById = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    expiration = Column(DateTime(timezone=True))
+    expiration = Column(DateTime(timezone=False), default=default_expiration)
     filename = Column(String(255))
 
     storage = relationship("Storage", back_populates="foodItems")
@@ -160,8 +167,8 @@ class FoodItem(Base):
             "name": self.name,
             "storage": self.storage.to_dict_no_recursion(),
             "enteredBy": self.enteredBy.to_dict(),
-            "entered": str(self.dateEntered),
-            "expiration": self.expiration,
+            "entered": str(self.dateEntered)+" GMT",
+            "expiration": str(self.expiration)+" GMT",
             "filename": self.filename,
             "tags": map(lambda x: x.tag, self.tags)
         }
