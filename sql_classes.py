@@ -60,16 +60,21 @@ class Household(Base):
     
     owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
     users = relationship("User", secondary=users_households_association, back_populates="households")
-    storages = relationship("Storage", back_populates="household", passive_deletes=True)
+    storages = relationship("Storage", back_populates="household", passive_deletes=True, lazy="joined")
     invites = relationship("Invite", back_populates="household", passive_deletes=True)
 
     def delete(self):
         # Remove item from S3
+        print("Deleting storages")
+        for storage in self.storages:
+            print("Deleting "+storage.name)
+            storage.delete()
+
         print("Deleting "+self.folder+" from S3\n")
         s3 = boto3.client("s3",
                           aws_access_key_id=access_key,
                           aws_secret_access_key=secret_key)
-        s3.delete_object(Bucket="fridge-app-photos-dev", Key=self.folder)
+        s3.delete_object(Bucket="fridge-app-photos-dev", Key=self.folder+"/")
 
     def to_dict(self):
         return {
@@ -101,7 +106,7 @@ class Storage(Base):
     householdId = Column(Integer, ForeignKey("households.id", ondelete='CASCADE'))
     
     household = relationship("Household", back_populates="storages", foreign_keys=[householdId])
-    foodItems = relationship("FoodItem", back_populates="storage", passive_deletes=True)
+    foodItems = relationship("FoodItem", back_populates="storage", passive_deletes=True, lazy="joined")
 
     def delete(self):
         print("Deleting all food items in "+self.name)
