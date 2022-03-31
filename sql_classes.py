@@ -62,7 +62,7 @@ class Household(Base):
     
     owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
     users = relationship("User", secondary=users_households_association, back_populates="households")
-    storages = relationship("Storage", back_populates="household", passive_deletes=True, lazy="joined")
+    storages = relationship("Storage", back_populates="household", passive_deletes="all", lazy="joined")
     invites = relationship("Invite", back_populates="household", passive_deletes=True)
 
     def delete(self):
@@ -108,7 +108,7 @@ class Storage(Base):
     householdId = Column(Integer, ForeignKey("households.id", ondelete='CASCADE'))
     
     household = relationship("Household", back_populates="storages", foreign_keys=[householdId])
-    foodItems = relationship("FoodItem", back_populates="storage", passive_deletes=True, lazy="joined")
+    foodItems = relationship("FoodItem", back_populates="storage", passive_deletes="all", lazy="joined")
 
     def delete(self):
         print("Deleting all food items in "+self.name)
@@ -167,8 +167,8 @@ class FoodItem(Base):
             "name": self.name,
             "storage": self.storage.to_dict_no_recursion(),
             "enteredBy": self.enteredBy.to_dict(),
-            "entered": str(self.dateEntered)+" GMT",
-            "expiration": str(self.expiration)+" GMT",
+            "entered": str(self.dateEntered),
+            "expiration": str(self.expiration),
             "filename": self.filename,
             "tags": map(lambda x: x.tag, self.tags)
         }
