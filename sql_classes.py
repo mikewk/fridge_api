@@ -166,7 +166,7 @@ class FoodItem(Base):
             "id": self.id,
             "name": self.name,
             "storage": self.storage.to_dict_no_recursion(),
-            "enteredBy": self.enteredBy.to_dict(),
+            "enteredBy": self.enteredBy.to_dict_no_recursion(),
             "entered": str(self.dateEntered),
             "expiration": str(self.expiration),
             "filename": self.filename,
