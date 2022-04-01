@@ -30,4 +30,7 @@ def get_invite(info, invite_id):
     if invite.status == 2 or invite.status == 3:
         return None
 
+    if user in invite.household.users:
+        raise Exception("User already belongs to this household")
+
     return invite
