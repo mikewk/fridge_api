@@ -1,11 +1,17 @@
-from datetime import timedelta, datetime, timezone
+import configparser
+import boto3
+import os
 
+from datetime import timedelta, datetime, timezone
 from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func, event
 from sqlalchemy.orm import relationship
 
-from api import access_key, secret_key
 from db import get_db
-import boto3
+
+config = configparser.ConfigParser()
+config.read(os.getenv("SECRET_PATH"))
+access_key = config["auth"]["awsid"]
+secret_key = config["auth"]["awssecret"]
 
 db = get_db()
 Base = db.Model
