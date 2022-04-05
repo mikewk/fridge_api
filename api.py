@@ -1,22 +1,28 @@
 import quart.flask_patch
+import asyncio
+from django.urls import path
+
 import db
 import configparser
 import logging
 import os
-import boto3
-from quart import Quart, request, jsonify
+
 from ariadne import load_schema_from_path, make_executable_schema, graphql_sync
+from ariadne.asgi import GraphQL
 from ariadne.constants import PLAYGROUND_HTML
-from quart import request, jsonify
+from quart import Quart, request, jsonify
 from sqlalchemy import *
 from dotenv import load_dotenv
 from quart_cors import cors
+from channels.routing import URLRouter
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
 
 load_dotenv(".env")
 
 app = Quart(__name__)
-app.debug = true
 app = cors(app, allow_origin="*")
+app.debug = true
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,10 +50,11 @@ db.init_app(app)
 def init_graphql():
     from resolvers.mutations import mutations
     from resolvers.queries import queries
+    from resolvers.subscriptions import subscriptions
     # Setup Resolvers
     type_defs = load_schema_from_path("schema.gql")
     schema = make_executable_schema(
-        type_defs, mutations, queries
+        type_defs, mutations, queries, subscriptions
     )
     return schema
 
@@ -93,7 +100,17 @@ async def graphql_server():
     status_code = 200 if success else 400
     return jsonify(result), status_code
 
+
 graphql_schema = init_graphql()
+asgiHandler = GraphQL(graphql_schema, debug=True)
+
+application = URLRouter([
+    path("ws", asgiHandler),
+    path("graphql", app)
+    ]
+)
 
 if __name__ == "__main__":
-    app.run(host="192.168.50.130", port=5000, debug=True)
+    config = Config()
+    config.bind = "192.168.50.130:8000"
+    asyncio.run(serve(application, config))

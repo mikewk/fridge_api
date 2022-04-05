@@ -1,6 +1,7 @@
 schema {
     mutation: Mutation
     query: Query
+    subscription: Subscription
 }
 
 type User
@@ -27,6 +28,7 @@ type Household
 type Storage
 {
     id: Int!
+    householdId: Int
     name: String!
     type: String!
     foodItems: [FoodItem]
@@ -110,6 +112,21 @@ type SuggestionPayload
     suggestion: Suggestion
     error: String
 }
+
+
+union MessageTypes = FoodItem | Storage | Household | AuthPayload
+
+type MessagePayload
+{
+    type: String!
+    action: String!
+    message: MessageTypes!
+}
+
+type Subscription {
+    messages(source_id: String, token: String) : MessagePayload
+}
+
 
 type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload

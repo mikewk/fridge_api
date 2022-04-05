@@ -77,9 +77,13 @@ def refresh_token(info):
     return generate_jwt(user)
 
 
-def validate_user(info):
-    if "Authorization" in info.context.headers:
+def validate_user(info, token=None):
+    if token is None and "Authorization" in info.context.headers:
         auth = info.context.headers["Authorization"]
+    else:
+        auth = token
+
+    if auth is not None:
         scheme, token = auth.split()
         if scheme.lower() != "bearer":
             raise ValueError("Invalid token")

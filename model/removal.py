@@ -2,6 +2,7 @@ import boto3
 from model.authentication import validate_user, get_item_if_member, get_storage_if_member, get_household_if_owner, \
     get_household_if_member
 from db import get_db
+from model.subscription_handler import send_message
 from model.user import get_user_by_id
 from sql_classes import Invite
 
@@ -16,6 +17,10 @@ def remove_food_item(info, food_item_id):
     if item is None:
         raise ValueError("Unable to retrieve FoodItem")
     storage_id = item.storageId
+    # Send a message if we have a source id
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id for user in item.storage.household.users]
+        send_message(user_ids, info.context.headers["SourceID"], "FoodItem", item, "remove")
     db = get_db()
     db.session.delete(item)
     db.session.commit()
@@ -31,6 +36,9 @@ def remove_storage(info, storage_id):
     if storage is None:
         raise ValueError("Unable to retrieve Storage")
     db = get_db()
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id for user in storage.household.users]
+        send_message(user_ids, info.context.headers["SourceID"], "Storage", storage, "remove")
     db.session.delete(storage)
     db.session.commit()
     return True
@@ -44,6 +52,10 @@ def remove_household(info, household_id):
     if household is None:
         raise ValueError("Unable to retrieve Household")
     db = get_db()
+    # Send a message if we have a source id
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id for user in household.users]
+        send_message(user_ids, info.context.headers["SourceID"], "Household", household, "remove")
     db.session.delete(household)
     db.session.commit()
     reset_default_household(user)
@@ -113,6 +125,7 @@ def leave_household(info, household_id):
     db = get_db()
     db.session.commit()
     return True
+
 
 def reset_default_household(user):
     if user.defaultHousehold is None:

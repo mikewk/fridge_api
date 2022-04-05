@@ -86,6 +86,7 @@ class Household(Base):
 
     def to_dict(self):
         return {
+            "_type": "Household",
             "id": self.id,
             "name": self.name,
             "location": self.location,
@@ -97,6 +98,7 @@ class Household(Base):
 
     def to_dict_no_recursion(self):
         return {
+            "_type": "Household",
             "id": self.id,
             "name": self.name,
             "location": self.location,
@@ -124,14 +126,17 @@ class Storage(Base):
 
     def to_dict(self):
         return {
+            "_type": "Storage",
             "id": self.id,
             "name": self.name,
             "type": self.type,
+            "householdId": self.householdId,
             "foodItems": map(lambda x: x.to_dict(), self.foodItems)
         }
 
     def to_dict_no_recursion(self):
         return {
+            "_type": "Storage",
             "id": self.id,
             "name": self.name,
             "type": self.type,
@@ -169,6 +174,7 @@ class FoodItem(Base):
 
     def to_dict(self):
         return {
+            "_type": "FoodItem",
             "id": self.id,
             "name": self.name,
             "storage": self.storage.to_dict_no_recursion(),

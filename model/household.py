@@ -1,6 +1,7 @@
 import uuid
 import boto3
 
+from model.subscription_handler import send_message
 from sql_classes import User, Household, Storage
 from model.authentication import validate_user, get_household_if_member, get_household_if_owner
 from db import get_db
@@ -103,6 +104,9 @@ def add_storage(info, name, storage_type, household_id):
                 storage.household = household
                 db.session.add(storage)
                 db.session.commit()
+                if "SourceID" in info.context.headers:
+                    user_ids = [user.id for user in storage.household.users]
+                    send_message(user_ids, info.context.headers["SourceID"], "Storage", storage, "add")
                 return storage
             except Exception as e:
                 raise e

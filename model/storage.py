@@ -1,5 +1,6 @@
 import os
 
+from model.subscription_handler import send_message
 from sql_classes import FoodItem, Tag, Storage
 from model.authentication import validate_user, get_storage_if_member
 from db import get_db
@@ -84,6 +85,11 @@ def add_food_item(info, storage_id, name, expiration, tags, entered, filename):
                 except Exception as e:
                     # We don't want file upload exceptions to kill the return, so... I dunno, log it?
                     print(str(e))
+            # Send a message if we have a source id
+            if "SourceID" in info.context.headers:
+                user_ids = [user.id for user in household.users]
+                send_message(user_ids, info.context.headers["SourceID"], "FoodItem", food_item, "add")
+
             return food_item
         else:
             raise ValueError("User is not authorized to access this storage")
