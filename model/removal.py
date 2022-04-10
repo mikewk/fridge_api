@@ -104,6 +104,10 @@ def remove_user_from_household(info, user_id, household_id):
 
     db = get_db()
     db.session.commit()
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id]
+        send_message(user_ids, info.context.headers["SourceID"], "Household", household, "remove_from")
+
     return True
 
 
@@ -121,9 +125,11 @@ def leave_household(info, household_id):
 
     household.users.remove(user)
     reset_default_household(user)
-
     db = get_db()
     db.session.commit()
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id]
+        send_message(user_ids, info.context.headers["SourceID"], "Household", household, "leave")
     return True
 
 

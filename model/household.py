@@ -33,7 +33,9 @@ def create_household(info, name, location):
 
             response = s3.put_object(Bucket="fridge-app-photos-dev", Key=(folder+'/'))
             print(response)
-
+            if "SourceID" in info.context.headers:
+                user_ids = [user.id]
+                send_message(user_ids, info.context.headers["SourceID"], "Household", household, "add")
             return household
         except Exception as e:
             raise e

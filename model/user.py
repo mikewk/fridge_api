@@ -1,6 +1,7 @@
 import uuid
 
 from model.authentication import validate_user, get_household_if_member, get_household_if_owner
+from model.subscription_handler import send_message
 from sql_classes import User, Invite
 
 from db import get_db
@@ -29,6 +30,9 @@ def change_default_household(info, household_id):
     db = get_db()
     user.defaultHousehold = household
     db.session.commit()
+    if "SourceID" in info.context.headers:
+        user_ids = [user.id]
+        send_message(user_ids, info.context.headers["SourceID"], "Household", household, "change_default")
     return household
 
 
@@ -74,6 +78,12 @@ def accept_household_invite(info, invite_id):
 
         db = get_db()
         db.session.commit()
+        # Accepting an invite only needs to be sent to that user for now.
+        # Once we revamp invites, we might want to send it to the household owner too but that's an edge case
+        # TODO: Revamp Invites to work with messaging system
+        if "SourceID" in info.context.headers:
+            user_ids = [user.id]
+            send_message(user_ids, info.context.headers["SourceID"], "Household", invite.household, "accept_invite")
     elif invite.status == 4:
         raise Exception("Invite has expired")
     else:
