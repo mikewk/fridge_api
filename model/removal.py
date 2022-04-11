@@ -6,6 +6,19 @@ from model.subscription_handler import send_message
 from model.user import get_user_by_id
 from sql_classes import Invite
 
+from contextlib import contextmanager
+
+
+# Ensures that removed objects don't expire before they're passed along in the subscription handler
+@contextmanager
+def no_expire(db):
+    s = db.session()
+    s.expire_on_commit = False
+    try:
+        yield
+    finally:
+        s.expire_on_commit = True
+
 
 def remove_food_item(info, food_item_id):
     from api import access_key
@@ -17,13 +30,15 @@ def remove_food_item(info, food_item_id):
     if item is None:
         raise ValueError("Unable to retrieve FoodItem")
     storage_id = item.storageId
-    # Send a message if we have a source id
-    if "SourceID" in info.context.headers:
-        user_ids = [user.id for user in item.storage.household.users]
-        send_message(user_ids, info.context.headers["SourceID"], "FoodItem", item, "remove")
+
     db = get_db()
-    db.session.delete(item)
-    db.session.commit()
+    with no_expire(db):
+        # Send a message if we have a source id
+        if "SourceID" in info.context.headers:
+            user_ids = [user.id for user in item.storage.household.users]
+            send_message(user_ids, info.context.headers["SourceID"], "FoodItem", item, "remove")
+        db.session.delete(item)
+        db.session.commit()
 
     return storage_id
 
@@ -36,11 +51,12 @@ def remove_storage(info, storage_id):
     if storage is None:
         raise ValueError("Unable to retrieve Storage")
     db = get_db()
-    if "SourceID" in info.context.headers:
-        user_ids = [user.id for user in storage.household.users]
-        send_message(user_ids, info.context.headers["SourceID"], "Storage", storage, "remove")
-    db.session.delete(storage)
-    db.session.commit()
+    with no_expire(db):
+        if "SourceID" in info.context.headers:
+            user_ids = [user.id for user in storage.household.users]
+            send_message(user_ids, info.context.headers["SourceID"], "Storage", storage, "remove")
+        db.session.delete(storage)
+        db.session.commit()
     return True
 
 
@@ -52,13 +68,15 @@ def remove_household(info, household_id):
     if household is None:
         raise ValueError("Unable to retrieve Household")
     db = get_db()
-    # Send a message if we have a source id
-    if "SourceID" in info.context.headers:
-        user_ids = [user.id for user in household.users]
-        send_message(user_ids, info.context.headers["SourceID"], "Household", household, "remove")
-    db.session.delete(household)
-    db.session.commit()
-    reset_default_household(user)
+    with no_expire(db):
+        # Send a message if we have a source id
+        if "SourceID" in info.context.headers:
+            user_ids = [user.id for user in household.users]
+            send_message(user_ids, info.context.headers["SourceID"], "Household", household, "remove")
+
+        db.session.delete(household)
+        db.session.commit()
+        reset_default_household(user)
 
     return True
 
@@ -124,7 +142,10 @@ def leave_household(info, household_id):
         raise Exception("Owner is not allowed to leave the household")
 
     household.users.remove(user)
-    reset_default_household(user)
+    if user.defaultHousehold == household:
+        user.defaultHousehold = None
+        reset_default_household(user)
+
     db = get_db()
     db.session.commit()
     if "SourceID" in info.context.headers:

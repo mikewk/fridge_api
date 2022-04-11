@@ -3,6 +3,7 @@ import boto3
 import os
 
 from datetime import timedelta, datetime, timezone
+
 from sqlalchemy import Integer, ForeignKey, String, Column, DateTime, Table, func, event
 from sqlalchemy.orm import relationship
 
@@ -45,8 +46,8 @@ class User(Base):
             "email": self.email,
             "name": self.fullName,
             "defaultHousehold": self.defaultHousehold.to_dict() if self.defaultHousehold else None,
-            "memberHouseholds": map(lambda x: x.to_dict(), self.households),
-            "ownedHouseholds": map(lambda x: x.to_dict(), self.ownedHouseholds)
+            "memberHouseholds": [x.to_dict() for x in self.households],
+            "ownedHouseholds": [x.to_dict() for x in self.ownedHouseholds]
         }
 
     def to_dict_no_recursion(self):
@@ -66,7 +67,7 @@ class Household(Base):
     ownerId = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     folder = Column(String(37))
     
-    owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId])
+    owner = relationship("User", back_populates="ownedHouseholds", foreign_keys=[ownerId], lazy="joined")
     users = relationship("User", secondary=users_households_association, back_populates="households")
     storages = relationship("Storage", back_populates="household", passive_deletes="all", lazy="joined")
     invites = relationship("Invite", back_populates="household", passive_deletes=True)
@@ -92,8 +93,8 @@ class Household(Base):
             "location": self.location,
             "folder": self.folder,
             "owner": self.owner.to_dict_no_recursion(),
-            "users": map(lambda x: x.to_dict_no_recursion(), self.users),
-            "storages": map(lambda x: x.to_dict(), self.storages)
+            "users": [x.to_dict_no_recursion() for x in self.users],
+            "storages": [x.to_dict() for x in self.storages]
         }
 
     def to_dict_no_recursion(self):
@@ -103,7 +104,7 @@ class Household(Base):
             "name": self.name,
             "location": self.location,
             "folder": self.folder,
-            "storages": map(lambda x: x.to_dict(), self.storages)
+            "storages": [x.to_dict() for x in self.storages]
         }
 
 
@@ -131,7 +132,7 @@ class Storage(Base):
             "name": self.name,
             "type": self.type,
             "householdId": self.householdId,
-            "foodItems": map(lambda x: x.to_dict(), self.foodItems)
+            "foodItems": [x.to_dict() for x in self.foodItems]
         }
 
     def to_dict_no_recursion(self):
@@ -182,7 +183,7 @@ class FoodItem(Base):
             "entered": str(self.dateEntered),
             "expiration": str(self.expiration),
             "filename": self.filename,
-            "tags": map(lambda x: x.tag, self.tags)
+            "tags": [x.tag for x in self.tags]
         }
 
 

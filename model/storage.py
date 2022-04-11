@@ -68,6 +68,7 @@ def add_food_item(info, storage_id, name, expiration, tags, entered, filename):
                 for tag in tags:
                     food_tag = Tag(tag=tag)
                     food_item.tags.append(food_tag)
+
             db.session.add(food_item)
             db.session.commit()
 
