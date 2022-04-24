@@ -31,12 +31,13 @@ def remove_queue(source_id, user_id):
 
 
 def send_message(user_ids, source_id, item_type, item, action):
+    from api import loop
     message = {"type": item_type, "action": action, "message": item.to_dict()}
     print("Sending {} to {} from {}".format(message, user_ids, source_id))
     for user_id in user_ids:   # iterate over our user ids
         for source, queue in allQueues[user_id].items():  # Since we use a default queue, we can skip checking user_id
             if source != source_id:  # make sure we don't send the message back to the source
                 try:
-                    queue.put_nowait(message)  # Finally, send the message
+                    loop.call_soon_threadsafe(queue.put_nowait, message)
                 except Exception as e:
                     print(str(e))  # Let's just print this out for now

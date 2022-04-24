@@ -135,6 +135,9 @@ type Mutation {
     editUsername(email: String!, password: String!): AuthPayload
     editPassword(password: String!, oldPassword: String!): AuthPayload
 
+    sendPasswordReset(email: String!, urlRoot: String!, urlSignature: String!): String
+    tryPasswordReset(password: String!, key: String!): String
+
     changeDefaultHousehold(householdId: Int!): HouseholdsPayload
 
     refreshToken: AuthPayload

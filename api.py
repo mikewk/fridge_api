@@ -1,13 +1,13 @@
 import quart.flask_patch
 import asyncio
-from django.urls import path
+from django.urls import path, re_path
 
 import db
 import configparser
 import logging
 import os
 
-from ariadne import load_schema_from_path, make_executable_schema, graphql_sync
+from ariadne import load_schema_from_path, make_executable_schema, graphql_sync, graphql
 from ariadne.asgi import GraphQL
 from ariadne.constants import PLAYGROUND_HTML
 from quart import Quart, request, jsonify
@@ -91,7 +91,7 @@ async def graphql_playground():
 async def graphql_server():
     global app
     data = await request.get_json()
-    success, result = graphql_sync(
+    success, result = await graphql(
         graphql_schema,
         data,
         context_value=request,
@@ -106,7 +106,7 @@ asgiHandler = GraphQL(graphql_schema, debug=True)
 
 application = URLRouter([
     path("ws", asgiHandler),
-    path("graphql", app)
+    re_path(r"", app)
     ]
 )
 
@@ -114,3 +114,9 @@ if __name__ == "__main__":
     config = Config()
     config.bind = "192.168.50.130:8000"
     asyncio.run(serve(application, config))
+
+try:
+    loop = asyncio.get_running_loop()
+except RuntimeError as e:
+    print("Couldn't get loop")
+    exit(1)
