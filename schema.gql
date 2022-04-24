@@ -132,8 +132,8 @@ type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
 
-    editUsername(email: String!, password: String!): AuthPayload
-    editPassword(password: String!, oldPassword: String!): AuthPayload
+    changeUsername(email: String!, password: String!): AuthPayload
+    changePassword(oldPassword: String!, newPassword: String!): AuthPayload
 
     sendPasswordReset(email: String!, urlRoot: String!, urlSignature: String!): String
     tryPasswordReset(password: String!, key: String!): String

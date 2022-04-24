@@ -1,6 +1,7 @@
 import boto3
-from model.authentication import validate_user, get_item_if_member, get_storage_if_member, get_household_if_owner, \
-    get_household_if_member
+from model.authentication import validate_user
+from model.authorization import get_item_if_member, get_storage_if_member, get_household_if_member, \
+    get_household_if_owner
 from db import get_db
 from model.subscription_handler import send_message
 from model.user import get_user_by_id

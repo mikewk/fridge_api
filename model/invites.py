@@ -1,4 +1,5 @@
-from model.authentication import validate_user, get_household_if_owner
+from model.authentication import validate_user
+from model.authorization import get_household_if_owner
 from sql_classes import Invite
 
 

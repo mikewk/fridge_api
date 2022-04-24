@@ -7,7 +7,7 @@ import configparser
 import os
 
 from model.emailer import send_email
-from sql_classes import User, Household, Storage, FoodItem, PasswordResets
+from sql_classes import User, PasswordResets
 from sqlalchemy import and_
 from db import get_db
 from datetime import datetime, timedelta
@@ -21,7 +21,7 @@ url_secret = config["auth"]["urlsecret"]
 
 def user_signup(email, password, name):
     db = get_db()
-    salt_base = str(uuid.uuid1())
+    salt_base = str(uuid.uuid4())
     salt = salt_base + my_salt  # Now as good as a random salt
     try:
         user = User.query.filter_by(email=email).first()
@@ -47,15 +47,17 @@ def user_login(email, password):
         if user is None:
             raise ValueError("Invalid credentials supplied - username")
         salt = user.salt + my_salt
-        my_hash = do_hash(password, salt)
-        if user.passwordHash != str(my_hash):
-            print(user.passwordHash);
-            print(str(my_hash))
+        if not valid_hash(password, salt, user.passwordHash):
             raise ValueError("Invalid credentials supplied - password")
     except Exception as e:
         raise e
 
     return generate_jwt(user)
+
+
+def valid_hash(password, salt, target_hash):
+    my_hash = str(do_hash(password, salt))
+    return target_hash == my_hash
 
 
 def do_hash(password, salt):
@@ -77,6 +79,39 @@ def refresh_token(info):
     # Get user if token is still valid
     user = validate_user(info)
     # generate new token
+    return generate_jwt(user)
+
+
+def edit_username(info, new_username, password):
+    user = validate_user(info)
+    # validate password
+    if not valid_hash(password, user.salt+my_salt, user.passwordHash):
+        raise ValueError("Invalid Password")
+
+    # update user
+    user.email = new_username
+    db = get_db()
+    db.session.commit()
+
+    return generate_jwt(user)
+
+
+def edit_password(info, old_password, new_password):
+    user = validate_user(info)
+    # validate password
+    if not valid_hash(old_password, user.salt + my_salt, user.passwordHash):
+        raise ValueError("Invalid Password")
+
+    # generate new salt and password hash
+    new_salt = str(uuid.uuid4())
+    new_password_hash = do_hash(new_password, new_salt + my_salt)
+
+    #update user
+    user.passwordHash = new_password_hash
+    user.salt = new_salt
+    db = get_db()
+    db.session.commit()
+
     return generate_jwt(user)
 
 
@@ -107,50 +142,6 @@ def validate_user(info, token=None):
         raise ValueError("No Authorization found in headers")
 
 
-def get_item_if_member(item_id, user):
-    # First, let's get the item
-    item = FoodItem.query.get(item_id) # type: FoodItem
-    # If the FoodItem doesn't exist, return none
-    if item is None:
-        return None
-
-    # Check if the user has access to the storage the item is in, if they don't return none
-    storage_id = item.storageId
-    storage = get_storage_if_member(storage_id, user)
-    if storage is None:
-        return None
-
-    # Since they have access to storage, return the item
-    return item
-
-
-def get_storage_if_member(storage_id, user):
-    # First step, get the household id of the storage_id
-    storage = Storage.query.get(storage_id)
-    if storage is None:
-        return None
-
-    # next, check if the user is a member of this household
-    household_id = storage.householdId
-    if get_household_if_member(household_id, user) is None:
-        return None
-    else:
-        return storage
-
-
-def get_household_if_member(household_id, user):
-    # It was doable in one line, hurrah
-    household = Household.query.filter(and_(Household.id == household_id,
-                                            Household.users.any(User.id == user.id))
-                                       ).first()
-    return household
-
-
-def get_household_if_owner(household_id, user):
-    household = Household.query.filter_by(id=household_id, owner=user).first()
-    return household
-
-
 def try_password_reset(password, key):
     # First, let's try to get the password reset data
     password_reset = PasswordResets.query.filter_by(token=key, status=0).first()
@@ -160,8 +151,6 @@ def try_password_reset(password, key):
     # Check if link is expired
     valid_time = datetime.utcnow() - timedelta(minutes=30)
     if valid_time > password_reset.created:
-        print(str(valid_time))
-        print(str(password_reset.created))
         return "Reset link expired"
 
     # TODO: We can do more checks here, especially against the IP address, to look for attacks
@@ -170,9 +159,7 @@ def try_password_reset(password, key):
     user = User.query.filter_by(id=password_reset.user_id).first()
     if user is None:
         return "User not longer exists"
-    print(str(user))
-    print(user.passwordHash)
-    print(user.email)
+
     # Let's make a new salt
     salt_base = str(uuid.uuid1())
     salt = salt_base + my_salt
@@ -186,22 +173,13 @@ def try_password_reset(password, key):
 
 
 async def send_password_reset(email, url_root, url_signature, remote_ip):
-    print("Doing send_password_reset")
     user = User.query.filter_by(email=email).first()
-    print("Checking user")
     if user is None:
-        print("No user found")
         return False
 
     # Verify url_root
-    print("Checking signature")
     signature = do_hash(url_root, url_secret)
     if signature != url_signature:
-        print("Signatures don't match!")
-        print("Our sig")
-        print(signature)
-        print("Given sig")
-        print(url_signature)
         return False
 
     # check for abusive request from a single IP
@@ -214,11 +192,9 @@ async def send_password_reset(email, url_root, url_signature, remote_ip):
         return False
 
     if pass_resets >= 4:
-        print("Too many password requests")
         return False
 
     # Build DB entry
-    print("Building DB Entry")
     new_uuid = uuid.uuid4()
     pass_reset = PasswordResets()
     pass_reset.user = user
@@ -229,15 +205,12 @@ async def send_password_reset(email, url_root, url_signature, remote_ip):
     db.session.add(pass_reset)
     db.session.commit()
 
-    print("Building URL")
     # build URL
     url = url_root + "auth/reset/" + str(new_uuid)
-    print("Sending email")
     try:
         await send_email(user.email, "Fridge Tracker Password Reset", emailTemplate.format(url))
     except Exception as e:
         print(str(e))
-    print("Email sent")
     return True
 
 

@@ -3,7 +3,8 @@ import boto3
 
 from model.subscription_handler import send_message
 from sql_classes import User, Household, Storage
-from model.authentication import validate_user, get_household_if_member, get_household_if_owner
+from model.authentication import validate_user
+from model.authorization import get_household_if_member, get_household_if_owner
 from db import get_db
 
 

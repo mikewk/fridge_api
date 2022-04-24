@@ -1,4 +1,5 @@
-from model.authentication import validate_user, get_item_if_member
+from model.authentication import validate_user
+from model.authorization import get_item_if_member
 from db import get_db
 from model.subscription_handler import send_message
 from sql_classes import Tag

@@ -1,6 +1,7 @@
 import asyncio
 
-from model.authentication import user_signup, user_login, refresh_token, send_password_reset, try_password_reset
+from model.authentication import user_signup, user_login, refresh_token, send_password_reset, try_password_reset, \
+    edit_username, edit_password
 from ariadne import ObjectType, convert_kwargs_to_snake_case
 
 mutation = ObjectType("Mutation")
@@ -65,3 +66,29 @@ def resolve_send_password_reset(obj, info, password, key):
     except Exception as e:
         print(str(e))
         return "An error occurred"
+
+
+@mutation.field("changeUsername")
+@convert_kwargs_to_snake_case
+def resolve_edit_username(obj, info, email, password):
+    print("Resolving changeUsername")
+    try:
+        token = edit_username(info, email, password)
+        payload = {"token": token, "error": None}
+    except Exception as e:
+        payload = {"token": None, "error": str(e)}
+
+    return payload
+
+
+@mutation.field("changePassword")
+@convert_kwargs_to_snake_case
+def resolve_edit_password(obj, info, old_password, new_password):
+    print("Resolving change password")
+    try:
+        token = edit_password(info, old_password, new_password)
+        payload = {"token": token, "error": None}
+    except Exception as e:
+        payload = {"token": None, "error": str(e)}
+
+    return payload

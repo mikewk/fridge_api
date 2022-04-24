@@ -2,7 +2,8 @@ import os
 
 from model.subscription_handler import send_message
 from sql_classes import FoodItem, Tag, Storage
-from model.authentication import validate_user, get_storage_if_member
+from model.authentication import validate_user
+from model.authorization import get_storage_if_member
 from db import get_db
 
 
