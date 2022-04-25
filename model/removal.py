@@ -1,7 +1,7 @@
 import boto3
 from model.authentication import validate_user
 from model.authorization import get_item_if_member, get_storage_if_member, get_household_if_member, \
-    get_household_if_owner
+    get_household_if_owner, get_storage_if_owner
 from db import get_db
 from model.subscription_handler import send_message
 from model.user import get_user_by_id
@@ -48,9 +48,9 @@ def remove_storage(info, storage_id):
     user = validate_user(info)
     if user is None:
         raise ValueError("User not authenticated")
-    storage = get_storage_if_member(storage_id, user)
+    storage = get_storage_if_owner(storage_id, user)
     if storage is None:
-        raise ValueError("Unable to retrieve Storage")
+        raise ValueError("User not authorized to remove this storage")
     db = get_db()
     with no_expire(db):
         if "SourceID" in info.context.headers:

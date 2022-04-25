@@ -57,6 +57,9 @@ def update_household(info, name, location, id_):
             if location is not None:
                 household.location = location
             db.session.commit()
+            if "SourceID" in info.context.headers:
+                user_ids = [user.id for user in household.users]
+                send_message(user_ids, info.context.headers["SourceID"], "Household", household, "edit")
             return household
         except Exception as e:
             raise e

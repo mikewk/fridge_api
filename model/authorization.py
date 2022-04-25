@@ -34,6 +34,20 @@ def get_storage_if_member(storage_id, user):
         return storage
 
 
+def get_storage_if_owner(storage_id, user):
+    # First step, get the household id of the storage_id
+    storage = Storage.query.get(storage_id)
+    if storage is None:
+        return None
+
+    # next, check if the user is a member of this household
+    household_id = storage.householdId
+    if get_household_if_owner(household_id, user) is None:
+        return None
+    else:
+        return storage
+
+
 def get_household_if_member(household_id, user):
     # It was doable in one line, hurrah
     household = Household.query.filter(and_(Household.id == household_id,

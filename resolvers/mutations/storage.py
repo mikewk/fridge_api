@@ -1,6 +1,7 @@
 from ariadne import ObjectType, convert_kwargs_to_snake_case
 from model.household import add_storage
-from model.storage import update
+from model.storage import update_storage
+
 mutation = ObjectType("Mutation")
 
 
@@ -18,9 +19,9 @@ def add_to_household(obj, info, name, storage_type, household_id):
 
 @mutation.field("updateStorage")
 @convert_kwargs_to_snake_case
-def update(obj, info, storage_id, name=None, storage_type=None):
+def resolve_update_storage(obj, info, storage_id, name=None, storage_type=None):
     try:
-        storage = update(info, storage_id, name, storage_type)
+        storage = update_storage(info, storage_id, name, storage_type)
         payload = {"storages": [storage.to_dict()], "error": None}
     except Exception as e:
         payload = {"storages": None, "error": str(e)}
