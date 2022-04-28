@@ -44,7 +44,7 @@ def create_household(info, name, location):
         raise TypeError("validate_user did not return User")
 
 
-def update_household(info, name, location, id_):
+def edit_household(info, name, location, id_):
     user = validate_user(info)
     db = get_db()
     if user is not None:

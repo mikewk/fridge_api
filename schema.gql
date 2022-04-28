@@ -132,8 +132,8 @@ type Mutation {
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
 
-    changeUsername(email: String!, password: String!): AuthPayload
-    changePassword(oldPassword: String!, newPassword: String!): AuthPayload
+    editUsername(email: String!, password: String!): AuthPayload
+    editPassword(oldPassword: String!, newPassword: String!): AuthPayload
 
     sendPasswordReset(email: String!, urlRoot: String!, urlSignature: String!): String
     tryPasswordReset(password: String!, key: String!): String
@@ -143,15 +143,15 @@ type Mutation {
     refreshToken: AuthPayload
     
     createHousehold(name: String!, location: String!) : HouseholdsPayload
-    updateHousehold(name: String, location: String, householdId:Int!) : HouseholdsPayload
+    editHousehold(name: String, location: String, householdId:Int!) : HouseholdsPayload
     
     addStorageToHousehold(name: String!, storageType: String!, householdId: Int!) : StoragesPayload
-    updateStorage(name: String, storageType:String, storageId: Int!): StoragesPayload
+    editStorage(name: String, storageType:String, storageId: Int!): StoragesPayload
     
     addFoodItemToStorage(name: String!, storageId: Int!, expiration: String, tags: [String], entered: String, filename: String): FoodItemsPayload
-    updateFoodItem(foodItemId: Int! name: String, expiration: String, tags: [String] ): FoodItemsPayload
+    editFoodItem(foodItemId: Int! name: String, expiration: String, tags: [String] ): FoodItemsPayload
     addTagsToFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
-    removeTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
+    deleteTagsFromFoodItem(tags: [String]!, foodItemId: Int!): FoodItemsPayload
     moveFoodItemToStorage(foodItemId: Int!, storageId: Int!): FoodItemsPayload
 
     getSuggestions(image: String) : SuggestionPayload
@@ -161,9 +161,9 @@ type Mutation {
     rejectHouseholdInvite(inviteId: String!) : RemovalPayload
     deleteInvite(inviteId: String!) : RemovalPayload
 
-    removeFoodItem(foodItemId: Int!) : RemovalPayload
-    removeStorage(storageId: Int!) : RemovalPayload
-    removeHousehold(householdId: Int!): RemovalPayload
+    deleteFoodItem(foodItemId: Int!) : RemovalPayload
+    deleteStorage(storageId: Int!) : RemovalPayload
+    deleteHousehold(householdId: Int!): RemovalPayload
     removeUserFromHousehold(userId: Int!, householdId: Int!): RemovalPayload
     leaveHousehold(householdId: Int!) : RemovalPayload
 }

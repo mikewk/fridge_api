@@ -20,7 +20,7 @@ def get_storage(info, storage_id):
         raise ValueError("User is not authenticated")
 
 
-def update_storage(info, storage_id, name, storage_type):
+def edit_storage(info, storage_id, name, storage_type):
     user = validate_user(info)
     db = get_db()
     if user is not None:

@@ -21,7 +21,7 @@ def no_expire(db):
         s.expire_on_commit = True
 
 
-def remove_food_item(info, food_item_id):
+def delete_food_item(info, food_item_id):
     from api import access_key
     from api import secret_key
     user = validate_user(info)
@@ -44,7 +44,7 @@ def remove_food_item(info, food_item_id):
     return storage_id
 
 
-def remove_storage(info, storage_id):
+def delete_storage(info, storage_id):
     user = validate_user(info)
     if user is None:
         raise ValueError("User not authenticated")
@@ -61,7 +61,7 @@ def remove_storage(info, storage_id):
     return True
 
 
-def remove_household(info, household_id):
+def delete_household(info, household_id):
     user = validate_user(info)
     if user is None:
         raise ValueError("User not authenticated")

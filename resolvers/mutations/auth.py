@@ -68,10 +68,10 @@ def resolve_send_password_reset(obj, info, password, key):
         return "An error occurred"
 
 
-@mutation.field("changeUsername")
+@mutation.field("editUsername")
 @convert_kwargs_to_snake_case
 def resolve_edit_username(obj, info, email, password):
-    print("Resolving changeUsername")
+    print("Resolving editUsername")
     try:
         token = edit_username(info, email, password)
         payload = {"token": token, "error": None}
@@ -81,10 +81,10 @@ def resolve_edit_username(obj, info, email, password):
     return payload
 
 
-@mutation.field("changePassword")
+@mutation.field("editPassword")
 @convert_kwargs_to_snake_case
 def resolve_edit_password(obj, info, old_password, new_password):
-    print("Resolving change password")
+    print("Resolving editPassword")
     try:
         token = edit_password(info, old_password, new_password)
         payload = {"token": token, "error": None}
