@@ -45,10 +45,10 @@ def user_login(email, password):
     try:
         user = User.query.filter_by(email=email).first()
         if user is None:
-            raise ValueError("Invalid credentials supplied - username")
+            raise ValueError("Invalid credentials supplied")
         salt = user.salt + my_salt
         if not valid_hash(password, salt, user.passwordHash):
-            raise ValueError("Invalid credentials supplied - password")
+            raise ValueError("Invalid credentials supplied")
     except Exception as e:
         raise e
 
