@@ -3,7 +3,8 @@ import boto3
 
 from model.subscription_handler import send_message
 from sql_classes import User, Household, Storage
-from model.authentication import validate_user, get_household_if_member, get_household_if_owner
+from model.authentication import validate_user
+from model.authorization import get_household_if_member, get_household_if_owner
 from db import get_db
 
 
@@ -43,7 +44,7 @@ def create_household(info, name, location):
         raise TypeError("validate_user did not return User")
 
 
-def update_household(info, name, location, id_):
+def edit_household(info, name, location, id_):
     user = validate_user(info)
     db = get_db()
     if user is not None:
@@ -56,6 +57,9 @@ def update_household(info, name, location, id_):
             if location is not None:
                 household.location = location
             db.session.commit()
+            if "SourceID" in info.context.headers:
+                user_ids = [user.id for user in household.users]
+                send_message(user_ids, info.context.headers["SourceID"], "Household", household, "edit")
             return household
         except Exception as e:
             raise e

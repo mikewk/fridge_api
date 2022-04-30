@@ -1,10 +1,11 @@
-from model.authentication import validate_user, get_item_if_member
+from model.authentication import validate_user
+from model.authorization import get_item_if_member
 from db import get_db
 from model.subscription_handler import send_message
 from sql_classes import Tag
 
 
-def update_food_item(info, food_item_id, name=None, expiration=None, tags=None):
+def edit_food_item(info, food_item_id, name=None, expiration=None, tags=None):
     user = validate_user(info)
     if user is not None:
         item = get_item_if_member(food_item_id, user)

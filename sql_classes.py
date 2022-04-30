@@ -225,6 +225,21 @@ class Invite(Base):
         }
 
 
+class PasswordResets(Base):
+    __tablename__ = "password_resets"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='SET NULL'))
+    token = Column(String(400))
+    created = Column(DateTime, server_default=func.now())
+    attempted = Column(DateTime)
+    status = Column(Integer)
+    request_ip = Column(String(255))
+    attempt_ip = Column(String(255))
+
+    user = relationship("User", uselist=False)
+
+
 @event.listens_for(FoodItem, 'after_delete')
 def receive_after_delete(mapper, connection, target):
     target.delete()

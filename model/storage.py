@@ -2,7 +2,8 @@ import os
 
 from model.subscription_handler import send_message
 from sql_classes import FoodItem, Tag, Storage
-from model.authentication import validate_user, get_storage_if_member
+from model.authentication import validate_user
+from model.authorization import get_storage_if_member, get_storage_if_owner
 from db import get_db
 
 
@@ -19,17 +20,24 @@ def get_storage(info, storage_id):
         raise ValueError("User is not authenticated")
 
 
-def update(info, storage_id, name, storage_type):
+def edit_storage(info, storage_id, name, storage_type):
     user = validate_user(info)
     db = get_db()
     if user is not None:
-        storage = get_storage_if_member(storage_id, user)
+        storage = get_storage_if_owner(storage_id, user)
         if storage is not None:
             if name is not None:
                 storage.name = name
             if storage_type is not None:
                 storage.type = storage_type
             db.session.commit()
+
+            # Send a message if we have a source id
+            if "SourceID" in info.context.headers:
+                user_ids = [user.id for user in storage.household.users]
+                send_message(user_ids, info.context.headers["SourceID"], "Storage", storage, "edit")
+            return storage
+
         else:
             raise ValueError("User is not authorized to update this storage")
 

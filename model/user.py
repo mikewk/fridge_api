@@ -1,6 +1,7 @@
 import uuid
 
-from model.authentication import validate_user, get_household_if_member, get_household_if_owner
+from model.authentication import validate_user
+from model.authorization import get_household_if_member, get_household_if_owner
 from model.subscription_handler import send_message
 from sql_classes import User, Invite
 
