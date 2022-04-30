@@ -38,6 +38,7 @@ config = configparser.ConfigParser()
 config.read(os.getenv("CONFIG_PATH"))
 mysql_uri = config["mysql"]["uri"]
 upload_base = config["directories"]["upload"]
+bind_address = config["bind"]["address"]
 config.read(os.getenv("SECRET_PATH"))
 access_key = config["auth"]["awsid"]
 secret_key = config["auth"]["awssecret"]
@@ -112,7 +113,7 @@ application = URLRouter([
 
 if __name__ == "__main__":
     config = Config()
-    config.bind = "192.168.50.130:8000"
+    config.bind = bind_address
     asyncio.run(serve(application, config))
 
 try:
